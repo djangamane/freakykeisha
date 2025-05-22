@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { v4 as uuidv4 } from 'uuid';
 import { createClient } from '@supabase/supabase-js';
 import "./App.css";
@@ -14,6 +14,8 @@ if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+const kb3ImageUrl = process.env.PUBLIC_URL + '/kb3.png';
+
 function App() {
   const [panelOpen, setPanelOpen] = useState(true);
   const [inputValue, setInputValue] = useState("");
@@ -21,177 +23,360 @@ function App() {
   const [currentSessionId, setCurrentSessionId] = useState(null);
   const [session, setSession] = useState(null); 
   const [loadingAuthState, setLoadingAuthState] = useState(true); 
-  const [email, setEmail] = useState(''); // State for email input
-  const [password, setPassword] = useState(''); // State for password input
-  const [authError, setAuthError] = useState(''); // State for displaying auth errors
-  const [authMessage, setAuthMessage] = useState(''); // State for non-error messages like 'Check email'
-  const [currentView, setCurrentView] = useState('chat'); // New state for current view
-  const [selectedUpgradeTier, setSelectedUpgradeTier] = useState(null); // NEW STATE
-  const [paymentError, setPaymentError] = useState(''); // For Coinbase payment errors
+  const [email, setEmail] = useState(''); 
+  const [password, setPassword] = useState(''); 
+  const [authError, setAuthError] = useState(''); 
+  const [authMessage, setAuthMessage] = useState(''); 
+  const [currentView, setCurrentView] = useState('chat'); 
+  const [selectedUpgradeTier, setSelectedUpgradeTier] = useState(null); 
+  const [paymentError, setPaymentError] = useState(''); 
+  const [userProfile, setUserProfile] = useState(null); 
+  const [isAiThinking, setIsAiThinking] = useState(false); 
+  const fetchingUserIdRef = useRef(null);
+  const messagesEndRef = useRef(null);
+
+  // New state for conversation history
+  const [conversationHistory, setConversationHistory] = useState([]);
+  const [isLoadingConversations, setIsLoadingConversations] = useState(false);
+
+  // Auto-scroll to the latest message
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  const fetchUserProfile = useCallback(async (userId) => {
+    if (!userId) {
+      setUserProfile({
+        subscription_tier: 'Free',
+        message_count_today: 0,
+        last_message_reset_at: null,
+        subscription_expires_at: null,
+        username: 'User'
+      });
+      fetchingUserIdRef.current = null;
+      return;
+    }
+
+    if (fetchingUserIdRef.current === userId) {
+      return; // Already fetching this user's profile
+    }
+
+    fetchingUserIdRef.current = userId;
+
+    try {
+      const { data, error, status } = await supabase
+        .from('profiles')
+        .select('subscription_tier, message_count_today, last_message_reset_at, subscription_expires_at, username, avatar_url, website, id') // Added id to profile
+        .eq('id', userId)
+        .single();
+
+      if (error && status !== 406) { 
+        console.error('Error fetching profile:', error);
+        setUserProfile({ 
+          subscription_tier: 'Free', 
+          message_count_today: 0, 
+          last_message_reset_at: null, 
+          subscription_expires_at: null,
+          username: 'User',
+          id: userId // Store id even if fetch fails partially
+        });
+      } else if (data) {
+        setUserProfile(data);
+        console.log("User profile data loaded.");
+      } else {
+        setUserProfile({ 
+          subscription_tier: 'Free', 
+          message_count_today: 0, 
+          last_message_reset_at: null, 
+          subscription_expires_at: null,
+          username: session?.user?.email || 'User', // Fallback username
+          id: userId // Store id
+        });
+      }
+    } catch (e) {
+      console.error("Exception fetching profile:", e);
+      setUserProfile({ 
+        subscription_tier: 'Free', 
+        message_count_today: 0, 
+        last_message_reset_at: null, 
+        subscription_expires_at: null,
+        username: 'User',
+        id: userId // Store id
+      });
+    } finally {
+      fetchingUserIdRef.current = null;
+    }
+  }, []); // Empty dependency array makes fetchUserProfile stable
+
+  // Function to fetch messages for a given session ID
+  const fetchAndSetMessagesForSession = useCallback(async (sessionId) => {
+    if (!sessionId) {
+        setMessages([]);
+        return;
+    }
+    // Optional: Add a loading state for messages if desired
+    // setLoadingMessages(true);
+    try {
+        const { data: sessionMessagesData, error } = await supabase
+            .from('messages')
+            .select('id, user_prompt, ai_response, created_at, session_id')
+            .eq('session_id', sessionId)
+            .order('created_at', { ascending: true });
+
+        if (error) {
+            console.error('Error fetching messages for session:', error);
+            setMessages([]); // Clear messages on error
+            return;
+        }
+
+        const loadedDisplayMessages = [];
+        sessionMessagesData.forEach(msg => {
+            if (msg.user_prompt) {
+                loadedDisplayMessages.push({ 
+                    id: `${msg.id}-user-${uuidv4()}`, // Ensure unique key
+                    text: msg.user_prompt, 
+                    sender: 'user',
+                    timestamp: msg.created_at 
+                });
+            }
+            if (msg.ai_response) {
+                loadedDisplayMessages.push({ 
+                    id: `${msg.id}-ai-${uuidv4()}`, // Ensure unique key
+                    text: msg.ai_response, 
+                    sender: 'ai',
+                    timestamp: msg.created_at 
+                });
+            }
+        });
+        setMessages(loadedDisplayMessages);
+    } catch (e) {
+        console.error("Exception fetching messages:", e);
+        setMessages([]);
+    } finally {
+        // setLoadingMessages(false);
+    }
+  }, []); // supabase is stable, no need to list as dep
+
+  // Function to fetch conversation history
+  const fetchConversationHistory = useCallback(async (userId) => {
+    if (!userId) {
+        setConversationHistory([]);
+        return;
+    }
+    setIsLoadingConversations(true);
+    try {
+        const { data: allMessages, error } = await supabase
+            .from('messages')
+            .select('session_id, user_prompt, created_at')
+            .eq('user_id', userId)
+            .not('session_id', 'is', null)
+            .order('created_at', { ascending: true }); // Get earliest messages first to pick first prompt
+
+        if (error) {
+            console.error('Error fetching conversation history:', error);
+            setConversationHistory([]);
+            return;
+        }
+
+        const sessionsMap = new Map();
+        allMessages.forEach(msg => {
+            if (msg.session_id && !sessionsMap.has(msg.session_id)) {
+                sessionsMap.set(msg.session_id, {
+                    id: msg.session_id,
+                    title: msg.user_prompt.substring(0, 35) + (msg.user_prompt.length > 35 ? '...' : ''),
+                    timestamp: msg.created_at 
+                });
+            }
+        });
+
+        const sortedHistory = Array.from(sessionsMap.values()).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)); // Show newest sessions first
+        setConversationHistory(sortedHistory);
+
+    } catch (e) {
+        console.error("Exception fetching conversation history:", e);
+        setConversationHistory([]);
+    } finally {
+        setIsLoadingConversations(false);
+    }
+  }, []); // supabase is stable
 
   useEffect(() => {
     setLoadingAuthState(true);
     const { data: authListener } = supabase.auth.onAuthStateChange(
       (_event, session) => {
         setSession(session);
-        const currentPath = window.location.pathname; // Get current path
+        const currentPath = window.location.pathname; 
+        const newUserId = session?.user?.id;
+        const currentProfileUserId = userProfile?.id;
 
         if (_event === 'SIGNED_IN') {
-          console.log("SIGNED_IN event occurred.");
-          if (session && session.access_token) {
-            console.log("Supabase session:", session);
-            console.log("USER ACCESS TOKEN (JWT):", session.access_token);
+          console.log("User signed in.");
+          if (newUserId) {
+            if (newUserId !== currentProfileUserId && fetchingUserIdRef.current !== newUserId) {
+                fetchUserProfile(newUserId); 
+            }
+            fetchConversationHistory(newUserId); // Fetch history on sign in
           }
-          // Only redirect to chat if not on a payment callback URL
           if (currentPath !== '/payment-success' && currentPath !== '/payment-cancelled') {
             setCurrentView('chat'); 
           }
-          setMessages([]); 
-          setCurrentSessionId(null); 
+          // Reset messages and session ID only if user actually changes or it's a fresh sign-in
+          if (!currentProfileUserId || (newUserId && newUserId !== currentProfileUserId)) {
+             setMessages([]); 
+             setCurrentSessionId(null); 
+          }
         } else if (_event === 'SIGNED_OUT') {
-          // Only redirect to chat if not on a payment callback URL
+          console.log("User signed out.");
           if (currentPath !== '/payment-success' && currentPath !== '/payment-cancelled') {
-             setCurrentView('chat'); // Shows auth form due to !session
+             setCurrentView('chat');
           }
           setMessages([]);
           setCurrentSessionId(null);
           setEmail(''); 
           setPassword(''); 
-        } else if (currentPath === '/payment-success') {
+          setUserProfile(null); 
+          setConversationHistory([]); // Clear history on sign out
+        } else if (_event === 'USER_UPDATED') {
+          // Handle user updates if necessary, e.g., email change confirmed
+          if (session && session.user && session.user.id !== currentProfileUserId && fetchingUserIdRef.current !== session.user.id) {
+            fetchUserProfile(session.user.id);
+          }
+        }
+        
+        // Path-based view changes, should ideally not interfere with auth state logic causing loops
+        if (currentPath === '/payment-success' && currentView !== 'paymentSuccess') {
             setCurrentView('paymentSuccess');
-        } else if (currentPath === '/payment-cancelled') {
+        } else if (currentPath === '/payment-cancelled' && currentView !== 'paymentCancelled') {
             setCurrentView('paymentCancelled');
-        } else if (!session) {
-            // Default to chat, which will show auth form if no session
+        } else if (!session && currentPath !== '/payment-success' && currentPath !== '/payment-cancelled' && currentView !== 'chat'){
+             // If no session and not on payment pages, ensure view is chat (e.g. after logout and path change)
             setCurrentView('chat');
         }
-        // If already on a payment success/cancelled view, do not override unless auth state changes significantly
-
         setLoadingAuthState(false);
       }
     );
 
-    // Handle initial load path if not covered by onAuthStateChange events immediately
-    // This is important if the page is directly loaded to /payment-success or /payment-cancelled
-    const initialPath = window.location.pathname;
-    if (initialPath === '/payment-success' && currentView !== 'paymentSuccess') {
-        setCurrentView('paymentSuccess');
-    }
-    if (initialPath === '/payment-cancelled' && currentView !== 'paymentCancelled') {
-        setCurrentView('paymentCancelled');
-    }
+    // Initial session check on mount
+    supabase.auth.getSession().then(({ data: { session: initialSess } }) => { 
+        if (initialSess && initialSess.user) {
+            if (!userProfile || userProfile.id !== initialSess.user.id && fetchingUserIdRef.current !== initialSess.user.id) {
+                fetchUserProfile(initialSess.user.id);
+            } else {
+                 setLoadingAuthState(false); // Already have profile for current session
+            }
+            fetchConversationHistory(initialSess.user.id); // Fetch history for initial session
+        } else {
+             setUserProfile(null); // Ensure profile is cleared if no initial session
+             setConversationHistory([]); // Clear history if no initial session
+             setLoadingAuthState(false); // No initial session
+        }
+    }).finally(() => setLoadingAuthState(false)); // General fallback
 
     return () => {
-      // The unsubscribe function is on authListener.data.subscription
       authListener?.data?.subscription?.unsubscribe();
     };
-  }, []);
+  }, [fetchUserProfile, fetchConversationHistory, userProfile?.id]);
 
-  const handleSendMessage = async () => {
-    if (inputValue.trim() === "") return;
+  // useEffect to fetch messages when currentSessionId changes
+  useEffect(() => {
+    if (currentSessionId && session?.user?.id) { 
+        fetchAndSetMessagesForSession(currentSessionId);
+    } else if (!currentSessionId) { // If session ID is explicitly nulled (e.g. new chat before first message)
+        setMessages([]); 
+    }
+  }, [currentSessionId, session?.user?.id, fetchAndSetMessagesForSession]);
 
-    const userMessage = {
-      id: uuidv4(), 
-      text: inputValue,
+  const handleSendMessage = async (e) => {
+    if (e) e.preventDefault();
+    if (!inputValue.trim() || !session) return;
+
+    const userMessageContent = inputValue.trim();
+    const newUserMessage = {
+      id: uuidv4(),
+      text: userMessageContent,
       sender: "user",
+      timestamp: new Date().toISOString(),
     };
-    setMessages((prevMessages) => [...prevMessages, userMessage]);
-    const currentInputValue = inputValue;
+
+    setMessages((prevMessages) => [...prevMessages, newUserMessage]);
     setInputValue("");
+    setIsAiThinking(true);
+
+    // Determine current session ID for the API call
+    let activeSessionId = currentSessionId;
+    if (!activeSessionId) {
+        activeSessionId = uuidv4();
+        setCurrentSessionId(activeSessionId); 
+    }
 
     const requestBody = {
-      message: currentInputValue,
+      message: userMessageContent,
       model: "goekdenizguelmez/JOSIEFIED-Qwen3", 
+      sessionId: activeSessionId, // Ensure activeSessionId is used
+      userId: session.user.id, // Pass userId to backend
     };
-
-    if (currentSessionId) {
-      requestBody.sessionId = currentSessionId;
-    }
 
     try {
       const response = await fetch("http://localhost:3001/api/chat", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          // Include Authorization header if your backend expects it for /api/chat
+          // "Authorization": `Bearer ${session.access_token}` 
         },
         body: JSON.stringify(requestBody),
       });
 
       if (!response.ok) {
-        let backendErrorMsg = `HTTP error! status: ${response.status}`; 
+        let backendErrorMsg = `HTTP error! status: ${response.status}`;
         try {
           const errorData = await response.json();
-          if (errorData && errorData.error) {
-            backendErrorMsg = errorData.error;
-          }
+          backendErrorMsg = errorData.message || errorData.error || backendErrorMsg;
         } catch (e) {
-          console.error("Could not parse JSON error from backend response or no 'error' field:", e);
+          // Ignore if error response is not JSON
         }
-        throw new Error(backendErrorMsg); 
+        console.error("Backend error:", backendErrorMsg);
+        // Revert optimistic update or show error message in chat
+        setMessages((prevMessages) => prevMessages.filter(msg => msg.id !== newUserMessage.id)); 
+        setMessages((prevMessages) => [...prevMessages, {id: uuidv4(), text: `Error: ${backendErrorMsg}`, sender: 'ai', error: true}]);
+        return;
       }
 
-      const data = await response.json(); 
-      let visibleReply = data.reply;
-      const thinkEndTag = "</think>";
-      const thinkEndIndex = visibleReply.indexOf(thinkEndTag);
-      if (thinkEndIndex !== -1) {
-        visibleReply = visibleReply.substring(thinkEndIndex + thinkEndTag.length).trim();
-      }
-
-      if (data.sessionId && !currentSessionId) {
-        setCurrentSessionId(data.sessionId);
-      }
-
-      const aiMessage = {
-        id: uuidv4(), 
-        text: visibleReply, 
+      const data = await response.json();
+      const aiResponse = {
+        id: data.aiMessageId || uuidv4(), 
+        text: data.message, 
         sender: "ai",
+        timestamp: new Date().toISOString(), 
       };
-      setMessages((prevMessages) => [...prevMessages, aiMessage]);
-    } catch (error) {
-      console.error("Error sending message:", error);
-      let displayErrorMessage = "Sorry, I couldn't connect to the AI. Please try again.";
-      
-      if (error.message) {
-        displayErrorMessage = error.message;
-      }
+      setMessages((prevMessages) => [...prevMessages, aiResponse]);
 
-      const errorMessage = {
-        id: uuidv4(), 
-        text: displayErrorMessage,
-        sender: "ai", 
-      };
-      setMessages((prevMessages) => [...prevMessages, errorMessage]);
+      // Refresh conversation history; a new message could mean a new session or an updated 'last active' time if sorting by that.
+      // Since our titles are based on the first prompt, it primarily helps if a new session was created.
+      fetchConversationHistory(session.user.id); 
+
+    } catch (error) {
+      console.error("Network or other error sending message:", error);
+      setMessages((prevMessages) => prevMessages.filter(msg => msg.id !== newUserMessage.id));
+      setMessages((prevMessages) => [...prevMessages, {id: uuidv4(), text: `Error: ${error.message}`, sender: 'ai', error: true}]);
+    } finally {
+      setIsAiThinking(false);
     }
   };
 
-  const handleSignUp = async (e) => {
-    e.preventDefault();
-    setAuthError(''); // Clear previous errors
-    setAuthMessage(''); // Clear previous messages
-    const { data, error } = await supabase.auth.signUp({
-      email: email,
-      password: password,
-    });
-    if (error) {
-      setAuthError(error.message);
-      console.error('Sign up error:', error.message);
-    } else {
-      // Check if email confirmation is required
-      if (data.user && data.user.identities && data.user.identities.length === 0) {
-        // This condition might indicate an unconfirmed user (though Supabase behavior can vary)
-        // A more reliable check is if session is null but user object exists and has confirmation_sent_at
-        setAuthMessage('Sign up successful! Please check your email to confirm your account.');
-      } else if (data.session) {
-        // User is signed up and immediately logged in (e.g. email confirmation disabled)
-        setAuthMessage('Sign up successful! You are now logged in.');
-        // onAuthStateChange will handle setting the session and navigating
-      } else {
-        // Default message if specific conditions aren't met but no error
-        setAuthMessage('Sign up successful! Please check your email for a confirmation link.');
-      }
-      console.log('Sign up initiated:', data);
-    }
+  // Handler for starting a new chat
+  const handleNewChat = () => {
+    // const newSessionId = uuidv4(); // No need to set here, handleSendMessage will if currentSessionId is null
+    setCurrentSessionId(null); // Signal that it's a new chat, messages will clear via useEffect
+    setMessages([]); // Explicitly clear messages for immediate UI feedback
+    setInputValue('');
+    // setPanelOpen(false); // Optional: close panel
+  };
+
+  // Handler for loading a selected conversation
+  const handleLoadConversation = (sessionId) => {
+    setCurrentSessionId(sessionId); // This will trigger the useEffect to fetch messages
+    // setPanelOpen(false); // Optional: close panel
   };
 
   const handleSignIn = async (e) => {
@@ -250,14 +435,15 @@ function App() {
     }
 
     const paymentRequestBody = {
-      amountUSD: amountUSD,
-      itemDescription: itemDescription,
+      amountUSD: amountUSD, 
+      itemDescription: itemDescription, 
       userEmail: session.user.email,
       userId: session.user.id,
+      tier: tier 
     };
 
     try {
-      console.log("Attempting to create Coinbase charge (frontend):", paymentRequestBody);
+      console.log("Attempting to create Coinbase charge (frontend) with requestBody:", paymentRequestBody); // Log the request body
       const response = await fetch("http://localhost:3001/api/create-coinbase-charge", {
         method: "POST",
         headers: {
@@ -267,17 +453,37 @@ function App() {
         body: JSON.stringify(paymentRequestBody),
       });
 
+      console.log("Frontend: Received response from backend. Status:", response.status, "StatusText:", response.statusText); // Log status
+
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.details || errorData.error || `HTTP error! status: ${response.status}`);
+        let errorData;
+        try {
+            errorData = await response.json(); // Try to parse error JSON
+            console.error("Frontend: Backend responded with an error:", errorData);
+        } catch (e) {
+            console.error("Frontend: Backend responded with an error, but couldn't parse JSON body:", await response.text());
+        }
+        throw new Error(errorData?.details || errorData?.error || `HTTP error! status: ${response.status}`);
       }
 
-      const data = await response.json();
-      console.log("Coinbase charge created (frontend):", data);
+      // IMPORTANT: Log the raw text first, then try to parse JSON
+      const responseText = await response.text();
+      console.log("Frontend: Raw response text from backend:", responseText);
 
-      if (data.hostedUrl) {
-        window.location.href = data.hostedUrl; 
+      let data;
+      try {
+          data = JSON.parse(responseText); // Manually parse the logged text
+      } catch (e) {
+          console.error("Frontend: Failed to parse JSON from backend response text:", e, "Raw text was:", responseText);
+          throw new Error("Failed to parse response from backend.");
+      }
+      
+      console.log("Frontend: Parsed JSON data from backend:", data); // This is the critical log
+
+      if (data && data.hosted_url) { // Check data AND data.hosted_url
+        window.location.href = data.hosted_url; 
       } else {
+        console.error("Frontend: hosted_url not found in parsed data. Data was:", data); // Log data if hosted_url is missing
         throw new Error("Hosted URL not found in response from backend.");
       }
 
@@ -297,6 +503,9 @@ function App() {
         <div className="entry-box">
           <h2>Welcome to Keisha AI</h2>
           <p>Please sign in or sign up to continue.</p>
+          <p className="disclaimer-text">
+            By signing in or registering, you confirm that you are 18 years of age or older and agree to our terms of service.
+          </p>
           <form className="auth-form">
             <input 
               type="email" 
@@ -316,7 +525,7 @@ function App() {
             {authMessage && <p className="auth-message">{authMessage}</p>} 
             <div className="auth-buttons">
               <button type="submit" onClick={handleSignIn} className="auth-button sign-in-btn">Sign In</button>
-              <button type="button" onClick={handleSignUp} className="auth-button sign-up-btn">Register</button> 
+              <button type="button" onClick={() => setCurrentView('signUp')} className="auth-button sign-up-btn">Register</button> 
             </div>
           </form>
         </div>
@@ -325,7 +534,10 @@ function App() {
   }
 
   return (
-    <div className="app-container-authed"> 
+    <div 
+      className="app-container-authed"
+      style={{ backgroundImage: `url(${kb3ImageUrl})`, backgroundSize: 'cover', backgroundPosition: 'center bottom', height: '100vh', overflow: 'hidden' }}
+    >
       {currentView === 'chat' && (
         <>
           <div className={panelOpen ? "side-panel" : "side-panel collapsed"}>
@@ -335,11 +547,24 @@ function App() {
             {panelOpen && (
               <div className="panel-content">
                 <h3>Conversations</h3>
-                <ul className="conversation-list">
-                  <li>Chat with Keisha</li>
-                  <li>Work Advice</li>
-                  <li>Relationship Tips</li>
-                </ul>
+                <button onClick={handleNewChat} className="new-chat-button">+ New Chat</button>
+                {isLoadingConversations ? (
+                  <p className="loading-conversations">Loading history...</p>
+                ) : conversationHistory.length === 0 ? (
+                  <p className="no-conversations">No past conversations.</p>
+                ) : (
+                  <ul className="conversation-list">
+                    {conversationHistory.map((conv) => (
+                      <li
+                        key={conv.id}
+                        className={`conversation-item ${conv.id === currentSessionId ? 'selected' : ''}`}
+                        onClick={() => handleLoadConversation(conv.id)}
+                      >
+                        {conv.title}
+                      </li>
+                    ))}
+                  </ul>
+                )}
                 <hr />
                 <h3>Options</h3>
                 <ul className="options-list">
@@ -357,12 +582,18 @@ function App() {
                   <p>{msg.text}</p>
                 </div>
               ))}
+              {isAiThinking && (
+                <div className="message ai-message thinking-message">
+                  <p className="message-text">Keisha is thinking...</p>
+                </div>
+              )}
+              <div ref={messagesEndRef} /> {/* For auto-scrolling */}
             </div>
             <div className="input-container">
               <input
                 className="chat-input"
                 type="text"
-                placeholder="Type your message..."
+                placeholder="Type your message to Keisha..."
                 value={inputValue} 
                 onChange={(e) => setInputValue(e.target.value)} 
                 onKeyPress={(e) => {
@@ -370,6 +601,7 @@ function App() {
                     handleSendMessage(); 
                   }
                 }}
+                disabled={!session || isAiThinking} // Disable if not logged in or AI is thinking (for later)
               />
               <button 
                 className="send-btn" 
@@ -378,11 +610,12 @@ function App() {
                     handleSendMessage(); 
                   }
                 }}
-                disabled={inputValue.trim() === ''} 
+                disabled={!session || !inputValue.trim() || isAiThinking}
               >
                 Send
               </button>
             </div>
+            <p className="disclaimer-text">AI can make mistakes. Consider checking important information.</p>
           </div>
         </>
       )}
@@ -397,7 +630,13 @@ function App() {
           <div className="settings-section account-info">
             <h3>Account</h3>
             <p>Email: {session.user?.email}</p>
-            <p>Current Plan: <span className="current-plan-badge">Free</span> (Placeholder)</p>
+            <p>Current Plan: <span className="current-plan-badge">{userProfile ? userProfile.subscription_tier : 'Loading...'}</span></p>
+            {userProfile && userProfile.subscription_tier !== 'Free' && userProfile.subscription_tier !== 'Gold' && userProfile.subscription_expires_at && (
+              <p>Renews on: {new Date(userProfile.subscription_expires_at).toLocaleDateString()}</p>
+            )}
+            {userProfile && userProfile.subscription_tier === 'Free' && (
+              <p>Messages today: {userProfile.message_count_today} / 10</p>
+            )}
           </div>
 
           <div className="settings-section subscription-section">
@@ -453,7 +692,20 @@ function App() {
           
           <div className="settings-section payment-options">
             <h3>Payment Options</h3>
-            <p>We accept Bitcoin! Details for our payment processor will be available here soon.</p>
+            <p>We Accept Bitcoin (via Coinbase on the upgrade page).</p>
+            <p>
+              <a 
+                href="mailto:abitofadviceconsulting@gmail.com?subject=Cash App Payment Inquiry for Keisha AI&body=I'm interested in paying for a Keisha AI subscription via Cash App. Please provide instructions.%0A%0ADesired Plan (select one and include price):%0A- Starter (Monthly): $15%0A- Pro (Annual): $75%0A- Gold (Lifetime): $150%0A%0AMy Keisha AI Email: [Your Keisha AI Login Email]%0A%0APlease note: Manual Cash App payments may take up to 1 hour to reflect on your account after payment confirmation."
+                target="_blank" 
+                rel="noopener noreferrer"
+                style={{color: '#f0f0f0', textDecoration: 'underline', fontWeight: 'bold'}}
+              >
+                **To Pay with Cash App: Send an Email Request**
+              </a>
+            </p>
+            <p style={{fontSize: '0.85em', marginTop: '0.5em', color: '#ccc'}}>
+              (Cash App Prices: Starter: $15/mo, Pro: $75/yr, Gold: $150/life. Please allow up to 1 hour for account update after manual payment confirmation.)
+            </p>
           </div>
 
           <div className="settings-section sign-out-section">
@@ -502,28 +754,15 @@ function App() {
 
           <div className="settings-section payment-details-section">
             <h3>Payment Information</h3>
-            <p>To complete your <strong>{selectedUpgradeTier}</strong> subscription using Bitcoin, please follow the instructions below:</p>
-            {/* Placeholder for Bitcoin payment details - REPLACE WITH YOUR ACTUAL PROCESSOR INFO */}
-            <div className="bitcoin-payment-info">
-              <h4>Pay with Bitcoin:</h4>
-              <p><strong>Amount to Send:</strong> [Equivalent BTC amount for {selectedUpgradeTier}]</p>
-              <p><strong>Bitcoin Address:</strong> [YOUR_COMPANY_BITCOIN_WALLET_ADDRESS] <button className="copy-btn">(Copy)</button></p>
-              <p><em>Please ensure you send the exact amount. Transaction fees are your responsibility.</em></p>
-              <p><em>After sending, it may take some time for the transaction to confirm on the network. Your upgrade will be processed once confirmed.</em></p>
-              <p><strong>Important:</strong> Save your transaction ID. If you have any issues, please contact support with your email and transaction ID.</p>
-            </div>
-            {/* We will later add a button or mechanism for users to confirm they've paid, or integrate a payment processor that handles callbacks. */}
+            <p>To complete your <strong>{selectedUpgradeTier}</strong> subscription, please follow the instructions below:</p>
+            <button onClick={() => handleUpgradePayment(selectedUpgradeTier)} className="tier-button">
+              Proceed to Coinbase
+            </button>
+            {paymentError && <p className="auth-error-message">{paymentError}</p>}
           </div>
 
           <div className="settings-section confirmation-section">
             <p>Once payment is confirmed, your account will be upgraded. Thank you for choosing Keisha AI!</p>
-             <button 
-              onClick={() => handleUpgradePayment(selectedUpgradeTier)} 
-              className="tier-button"
-            >
-              Pay with Coinbase
-            </button>
-            {paymentError && <p className="auth-error-message">{paymentError}</p>}
             <button 
                 onClick={() => {
                     setCurrentView('settings'); 

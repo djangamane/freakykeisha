@@ -1,31 +1,47 @@
 .app-container-authed {
-  display: flex; /* Key for arranging side-panel & chat-box OR settings-page-full-view */
-  flex-direction: row; /* Default for chat view, settings will override or be only child */
+  display: flex;
+  flex-direction: row;
   height: 100vh;
-  background: #282c34 url('../public/kb3.png') no-repeat bottom center;
+  background-color: #282c34; 
   background-size: cover;
+  background-position: center;
   padding: 24px; 
   box-sizing: border-box;
-  gap: 20px; /* ADDED: Creates space between side-panel and chat-box */
+  gap: 20px; 
+}
+
+.disclaimer-text {
+  font-size: 0.8em;
+  color: #f8c3d7; /* Lighter pink, adjust as needed */
+  margin-top: 10px; /* Space above the form */
+  margin-bottom: 15px; /* Space below the disclaimer */
+  max-width: 90%;
+  line-height: 1.4;
+}
+
+/* Center the disclaimer text specifically within the chat box */
+.chat-box .disclaimer-text {
+  text-align: center;
+  width: 100%; /* Ensure it takes full width to center properly */
 }
 
 .side-panel {
   width: 250px;
   min-width: 250px;
   max-width: 250px;
-  height: calc(100vh - 48px); /* Match chat-box height within padded parent */
-  background: linear-gradient(to bottom, rgba(255, 0, 255, 0.75), rgba(128, 0, 128, 0.75)); /* UPDATED to match chat-box */
+  height: calc(100vh - 48px); 
+  background: linear-gradient(to bottom, rgba(255, 0, 255, 0.75), rgba(128, 0, 128, 0.75)); 
   padding: 20px;
   box-sizing: border-box;
-  border-radius: 12px 0 0 12px; /* Rounded corners on one side */
+  border-radius: 12px 0 0 12px; 
   box-shadow: 3px 0 10px rgba(0,0,0,0.2);
   display: flex;
   flex-direction: column;
   color: #fff;
   transition: width 0.3s ease, transform 0.3s ease;
   z-index: 100; 
-  position: relative; /* ADDED: Ensure it participates in flex layout correctly */
-  flex-shrink: 0; /* ADDED: Prevent shrinking */
+  position: relative; 
+  flex-shrink: 0; 
   border-right: none;
   margin: 0 24px 0 0;
   overflow: hidden;
@@ -79,10 +95,10 @@
 }
 
 .chat-box {
-  flex-grow: 0; /* It should not grow beyond its defined clamp width */
+  flex-grow: 0; 
   flex-shrink: 0;
   width: clamp(450px, 50vw, 800px); 
-  height: calc(100vh - 48px); /* Accounts for parent padding */
+  height: calc(100vh - 48px); 
   background: linear-gradient(to bottom, rgba(255, 0, 255, 0.75), rgba(128, 0, 128, 0.75)); 
   display: flex;
   flex-direction: column;
@@ -90,7 +106,7 @@
   border-left: none;
   border-radius: 18px;
   margin: 0; 
-  margin-left: auto; /* RE-ADDED: This will push the chat-box to the right of the side-panel + gap */
+  margin-left: auto; 
   overflow: hidden;
 }
 
@@ -160,13 +176,15 @@
 
 .landing-page {
   display: flex;
-  justify-content: flex-end;
-  align-items: center;
+  flex-direction: column; 
+  justify-content: flex-end; /* Align to bottom */
+  align-items: flex-end; /* Align to right */
   height: 100vh;
-  background: #282c34 url('../public/kb.png') no-repeat top center;
+  background: #282c34 url('../public/kbf.png') no-repeat top center; 
   background-size: cover;
   color: white;
-  padding-right: 10%;
+  padding-right: 10%; /* Keep for spacing from very edge */
+  padding-bottom: 5%; /* Add some bottom padding to landing-page */
 }
 
 .entry-box {
@@ -180,7 +198,6 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-left: auto;
   text-align: center;
   gap: 18px;
 }
@@ -385,17 +402,17 @@
 }
 
 .settings-page-full-view { 
-  width: 100%; /* Take full width of app-container-authed */
-  height: 100%; /* Take full height of app-container-authed (or calc(100vh - 48px) if using parent padding) */
-  background: linear-gradient(to bottom, rgba(255, 0, 255, 0.8), rgba(128, 0, 128, 0.8)); /* Slightly less transparent than chat-box for readability */
-  border-radius: 18px; /* Consistent with chat-box */
+  width: 100%; 
+  height: 100%; 
+  background: linear-gradient(to bottom, rgba(255, 0, 255, 0.8), rgba(128, 0, 128, 0.8)); 
+  border-radius: 18px; 
   padding: 20px 30px; 
   color: #fff; 
   display: flex;
   flex-direction: column;
   align-items: stretch; 
   overflow-y: auto; 
-  box-shadow: 0px 0 24px 0 rgba(40,44,52,0.25); /* Optional shadow */
+  box-shadow: 0px 0 24px 0 rgba(40,44,52,0.25); 
 }
 
 .settings-page-full-view h2 {
@@ -608,23 +625,23 @@
 
 /* Styles for Upgrade/Checkout Page */
 .upgrade-checkout-page-full-view .settings-header h2 {
-  font-size: 1.8em; /* Slightly larger title for this page */
+  font-size: 1.8em; 
 }
 
 .upgrade-checkout-page-full-view .settings-section {
-  background-color: rgba(0, 0, 0, 0.2); /* Slightly more distinct section background */
+  background-color: rgba(0, 0, 0, 0.2); 
   /* margin-bottom: 25px; Already there */
 }
 
 .upgrade-summary-section p,
 .payment-details-section p,
 .confirmation-section p {
-  font-size: 1em; /* Ensure readability */
+  font-size: 1em; 
   line-height: 1.6;
 }
 
 .bitcoin-payment-info {
-  background-color: rgba(0, 0, 0, 0.25); /* Darker box for payment info */
+  background-color: rgba(0, 0, 0, 0.25); 
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 8px;
   padding: 20px;
@@ -633,7 +650,7 @@
 
 .bitcoin-payment-info h4 {
   margin-top: 0;
-  color: #ffd700; /* Gold color for emphasis */
+  color: #ffd700; 
   font-size: 1.2em;
 }
 
@@ -642,9 +659,9 @@
 }
 
 /* Style for Bitcoin address for better copy-paste */
-.bitcoin-payment-info p:nth-of-type(3) { /* Target the paragraph with the address - adjust if structure changes */
+.bitcoin-payment-info p:nth-of-type(3) { 
   font-family: 'Courier New', Courier, monospace;
-  word-break: break-all; /* Ensure long addresses wrap */
+  word-break: break-all; 
   background-color: rgba(255,255,255,0.05);
   padding: 5px;
   border-radius: 4px;
@@ -666,9 +683,9 @@
 }
 
 .upgrade-checkout-page-full-view .confirmation-section .tier-button {
-  background-color: #6c757d; /* More subdued color for "Changed my mind" */
+  background-color: #6c757d; 
   display: block;
-  margin: 20px auto 0 auto; /* Center it and give some top margin */
+  margin: 20px auto 0 auto; 
 }
 
 .upgrade-checkout-page-full-view .confirmation-section .tier-button:hover {
@@ -678,29 +695,29 @@
 /* Landing Page styles remain largely the same */
 .landing-page {
   height: 100vh;
-  background: url('../public/kb.png') no-repeat center top fixed; /* UPDATED to center top */
+  background: url('../public/kbf.png') no-repeat center top fixed; /* CORRECTED PATH - retaining original structure which did not have #282c34 here */
   background-size: cover;
   display: flex;
-  justify-content: center;
-  align-items: center;
+  justify-content: flex-end; /* Align to bottom */
+  align-items: flex-end; /* Align to right */
   padding: 20px;
   box-sizing: border-box;
 }
 
 /* Authentication Form Styling (within Landing Page or other contexts) */
-.entry-box, /* Renamed from auth-form-container for broader use */
+.entry-box, 
 .auth-form-container { 
   display: flex;
   flex-direction: column;
-  gap: 15px; /* Space between form elements */
+  gap: 15px; 
   padding: 25px;
-  background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent dark background */
+  background-color: rgba(0, 0, 0, 0.7); 
   border-radius: 8px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5); /* More pronounced shadow */
-  min-width: 300px; /* Minimum width */
-  max-width: 400px; /* Maximum width */
-  position: relative; /* Context for transform */
-  transform: translateY(30px); /* Nudge down */
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5); 
+  min-width: 300px; 
+  max-width: 400px; 
+  position: relative; 
+  transform: translateY(30px); 
 }
 
 .auth-form-container input[type="email"],
@@ -708,23 +725,23 @@
 .auth-form-container input[type="text"] {
   padding: 12px;
   border-radius: 6px;
-  border: 1px solid #555; /* Darker border */
-  background-color: #333; /* Dark input background */
-  color: #fff; /* Light text */
+  border: 1px solid #555; 
+  background-color: #333; 
+  color: #fff; 
   font-size: 1em;
 }
 
 .auth-form-container input[type="email"]::placeholder,
 .auth-form-container input[type="password"]::placeholder,
 .auth-form-container input[type="text"]::placeholder {
-  color: #888; /* Lighter placeholder text */
+  color: #888; 
 }
 
 .auth-form-container button[type="submit"] {
   padding: 12px;
   border-radius: 6px;
   border: none;
-  background-color: #f042c1; /* Keisha-themed button */
+  background-color: #f042c1; 
   color: white;
   font-size: 1.1em;
   cursor: pointer;
@@ -732,11 +749,11 @@
 }
 
 .auth-form-container button[type="submit"]:hover {
-  background-color: #d020a1; /* Darker hover */
+  background-color: #d020a1; 
 }
 
 .auth-form-container .form-toggle-link {
-  color: #f042c1; /* Keisha-themed link */
+  color: #f042c1; 
   text-decoration: none;
   font-size: 0.9em;
   text-align: center;
@@ -748,7 +765,7 @@
 }
 
 .error-message {
-  color: #ff4d4d; /* Bright red for errors */
+  color: #ff4d4d; 
   background-color: rgba(255, 77, 77, 0.1);
   padding: 10px;
   border-radius: 4px;
@@ -758,7 +775,7 @@
 }
 
 .success-message {
-    color: #4CAF50; /* Green for success */
+    color: #4CAF50; 
     background-color: rgba(76, 175, 80, 0.1);
     padding: 10px;
     border-radius: 4px;
