@@ -17,7 +17,10 @@ if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-const kb3ImageUrl = process.env.PUBLIC_URL + '/kb3.png';
+const kb3ImageUrl = process.env.PUBLIC_URL + '/kb3.png'; // Chat page desktop background
+const desktopLandingImageUrl = process.env.PUBLIC_URL + '/kbf.png'; // Landing page desktop background
+const mobileKeishaImageUrl = process.env.PUBLIC_URL + '/mobilekeish2.png'; // Chat page mobile background
+const mobileLandingImageUrl = process.env.PUBLIC_URL + '/mobilekeish.png'; // Landing page mobile background
 
 // Keisha AI System Prompt
 const KEISHA_SYSTEM_PROMPT = `Your name is Keisha...`;
@@ -94,12 +97,23 @@ function App() {
   const [selectedUpgradeTier, setSelectedUpgradeTier] = useState(null); 
   const [paymentError, setPaymentError] = useState(''); 
   const [isInitializingNewSession, setIsInitializingNewSession] = useState(false);
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const fetchingUserIdRef = useRef(null);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
   const isFetchingProfile = useRef(false);
   const [loadingProfile, setLoadingProfile] = useState(false); // Initialize to false, true when fetching
   const [profileError, setProfileError] = useState(null);
+  
+  // Handle window resize to detect mobile vs desktop
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Function to scroll to the bottom of the chat
   const scrollToBottom = useCallback(() => {
@@ -620,7 +634,14 @@ function App() {
   // If we reach here, loadingAuthState AND loadingProfile are BOTH false.
   if (!session) {
     return (
-      <div className="landing-page"> 
+      <div 
+        className="landing-page"
+        style={{ 
+          backgroundImage: `url(${windowWidth <= 768 ? mobileLandingImageUrl : desktopLandingImageUrl})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center'
+        }}
+      > 
         <div className="entry-box">
           <h2>Welcome to Keisha AI</h2>
           <p>Please sign in or sign up to continue.</p>
@@ -657,7 +678,13 @@ function App() {
   return (
     <div 
       className="app-container-authed"
-      style={{ backgroundImage: `url(${kb3ImageUrl})`, backgroundSize: 'cover', backgroundPosition: 'center bottom', height: '100vh', overflow: 'hidden' }}
+      style={{ 
+        backgroundImage: `url(${windowWidth <= 768 ? mobileKeishaImageUrl : kb3ImageUrl})`, 
+        backgroundSize: 'cover', 
+        backgroundPosition: windowWidth <= 768 ? 'center' : 'center bottom', 
+        height: '100vh', 
+        overflow: 'hidden' 
+      }}
     >
       {currentView === 'chat' && (
         <>
@@ -682,6 +709,17 @@ function App() {
               </div>
             )}
           </div>
+          
+          {/* Mobile hamburger menu button - only visible when panel is collapsed */}
+          {!panelOpen && (
+            <button 
+              className="mobile-menu-button" 
+              onClick={() => setPanelOpen(true)}
+              aria-label="Open menu"
+            >
+              <span style={{ fontSize: '24px', fontWeight: 'bold' }}>☰</span>
+            </button>
+          )}
           <div className="chat-box">
             <div className="chat-content">
               {messages.map((msg, index) => {

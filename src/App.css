@@ -1,3 +1,17 @@
+/* Landing Page Styles */
+.landing-page {
+  height: 100vh;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-size: cover;
+  background-position: center;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+/* The background image is set inline in App.js for desktop */
 .app-container-authed {
   display: flex;
   flex-direction: row;
@@ -809,6 +823,175 @@
 .support-link:hover {
     color: #ff94c2;
     text-decoration: underline;
+}
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+    /* Mobile styles for app container */
+    .app-container-authed {
+        /* Background image will be set via inline style in App.js */
+        padding: 10px;
+        flex-direction: column;
+    }
+    /* Landing/Login Page */
+    .landing-page {
+        padding: 15px;
+        /* Background will be set inline in App.js */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    .landing-page .entry-box {
+        width: 85%;
+        max-width: 320px;
+        padding: 20px;
+        margin: 0;
+        transform: none;
+        background-color: rgba(0, 0, 0, 0.75);
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
+    }
+    
+    .auth-input, .auth-form input[type="email"],
+    .auth-form input[type="password"],
+    .auth-form input[type="text"] {
+        font-size: 16px; /* Prevents iOS zoom on focus */
+        padding: 12px;
+        width: 100%;
+        box-sizing: border-box;
+    }
+    
+    .auth-buttons {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .auth-button {
+        width: 100%;
+        margin: 5px 0;
+        padding: 14px;
+        font-size: 16px;
+    }
+    
+    /* Chat Interface */
+    .app-container-authed {
+        flex-direction: column;
+        padding: 10px;
+        gap: 10px;
+    }
+    
+    /* Mobile Side Panel Styling */
+    .side-panel {
+        position: fixed;
+        top: 0;
+        left: -250px; /* Start off-screen */
+        width: 250px;
+        height: 100vh;
+        background: linear-gradient(to bottom, rgba(255, 0, 255, 0.85), rgba(128, 0, 128, 0.85));
+        z-index: 1000;
+        transition: left 0.3s ease;
+        overflow-y: auto;
+        border-radius: 0 12px 12px 0;
+        box-shadow: 3px 0 10px rgba(0,0,0,0.3);
+    }
+    
+    .side-panel:not(.collapsed) {
+        left: 0; /* Slide in */
+    }
+    
+    .side-panel.collapsed {
+        left: -250px; /* Hide off-screen */
+    }
+    
+    .panel-toggle {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        z-index: 10;
+        font-size: 20px;
+        background-color: transparent;
+        color: white;
+        border: none;
+        cursor: pointer;
+    }
+    
+    .mobile-menu-button {
+        position: fixed;
+        top: 15px;
+        left: 15px;
+        width: 45px;
+        height: 45px;
+        background-color: rgba(240, 98, 146, 0.9);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 24px;
+        font-weight: bold;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+        cursor: pointer;
+        border: 2px solid white;
+        outline: none;
+        transition: all 0.2s ease;
+    }
+    
+    .mobile-menu-button:hover {
+        background-color: rgba(240, 98, 146, 1);
+        transform: scale(1.05);
+    }
+    
+    .chat-box {
+        width: 100%;
+        height: calc(100vh - 100px);
+        margin-left: 0;
+        border-radius: 12px;
+        position: relative;
+        z-index: 1; /* Lower than the side panel */
+    }
+    
+    .chat-content {
+        height: calc(100% - 90px);
+    }
+    
+    .message {
+        max-width: 85%;
+        padding: 10px;
+        margin-bottom: 8px;
+    }
+    
+    .input-container {
+        padding: 10px;
+    }
+    
+    .chat-input {
+        font-size: 16px;
+        padding: 12px;
+    }
+    
+    .send-btn {
+        padding: 12px 15px;
+        font-size: 16px;
+    }
+    
+    /* Settings Page */
+    .settings-page-full-view {
+        padding: 15px;
+        width: 100%;
+        box-sizing: border-box;
+    }
+    
+    .subscription-tiers-container {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .subscription-tier {
+        width: 100%;
+        margin: 0;
+    }
 }
 
 /* Paywall Modal Styles */
