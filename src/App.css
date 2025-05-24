@@ -1055,3 +1055,68 @@
 .paywall-modal-content button.secondary:hover {
   background-color: #5e35b1; /* Darker Purple */
 }
+
+/* Cash App Payment Styles */
+.cash-app-payment {
+  margin-top: 20px;
+  padding: 15px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  border-left: 3px solid #00c244; /* Cash App green */
+}
+
+.cash-app-payment h4 {
+  color: #00c244;
+  margin-top: 0;
+  margin-bottom: 15px;
+  font-size: 1.2em;
+}
+
+.cash-app-container {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+  align-items: center;
+}
+
+.cash-app-qr {
+  width: 150px;
+  height: 150px;
+  background-color: white;
+  padding: 10px;
+  border-radius: 8px;
+}
+
+.cash-app-instructions {
+  flex: 1;
+}
+
+.cash-app-instructions p {
+  margin: 8px 0;
+}
+
+.cash-app-instructions ul {
+  margin: 8px 0;
+  padding-left: 20px;
+}
+
+.cash-app-instructions li {
+  margin: 5px 0;
+}
+
+.cash-app-id {
+  margin-top: 15px;
+  text-align: center;
+  font-size: 1.1em;
+}
+
+/* Mobile styles for Cash App payment */
+@media (max-width: 768px) {
+  .cash-app-container {
+    flex-direction: column;
+  }
+  
+  .cash-app-qr {
+    margin: 0 auto 15px;
+  }
+}

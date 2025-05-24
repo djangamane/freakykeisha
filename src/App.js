@@ -853,19 +853,28 @@ function App() {
           <div className="settings-section payment-options">
             <h3>Payment Options</h3>
             <p>We Accept Bitcoin (via Coinbase on the upgrade page).</p>
-            <p>
-              <a 
-                href="mailto:abitofadviceconsulting@gmail.com?subject=Cash App Payment Inquiry for Keisha AI&body=I'm interested in paying for a Keisha AI subscription via Cash App. Please provide instructions.%0A%0ADesired Plan (select one and include price):%0A- Starter (Monthly): $15%0A- Pro (Annual): $75%0A- Gold (Lifetime): $150%0A%0AMy Keisha AI Email: [Your Keisha AI Login Email]%0A%0APlease note: Manual Cash App payments may take up to 1 hour to reflect on your account after payment confirmation."
-                target="_blank" 
-                rel="noopener noreferrer"
-                style={{color: '#f0f0f0', textDecoration: 'underline', fontWeight: 'bold'}}
-              >
-                **To Pay with Cash App: Send an Email Request**
-              </a>
-            </p>
-            <p style={{fontSize: '0.85em', marginTop: '0.5em', color: '#ccc'}}>
-              (Cash App Prices: Starter: $15/mo, Pro: $75/yr, Gold: $150/life. Please allow up to 1 hour for account update after manual payment confirmation.)
-            </p>
+            <div className="cash-app-payment">
+              <h4>Pay with Cash App</h4>
+              <div className="cash-app-container">
+                <img 
+                  src={process.env.PUBLIC_URL + '/2cashapp.png'} 
+                  alt="Keisha AI Cash App QR Code" 
+                  className="cash-app-qr" 
+                />
+                <div className="cash-app-instructions">
+                  <p><strong>1.</strong> Scan QR code with Cash App</p>
+                  <p><strong>2.</strong> Send exact amount for your plan:</p>
+                  <ul>
+                    <li><strong>Starter:</strong> $15/month</li>
+                    <li><strong>Pro:</strong> $75/year</li>
+                    <li><strong>Gold:</strong> $150 (lifetime)</li>
+                  </ul>
+                  <p><strong>3.</strong> Include your email in payment note</p>
+                  <p><strong>4.</strong> Account will update within 1 hour</p>
+                </div>
+              </div>
+              <p className="cash-app-id">Cash App ID: <strong>$KeishaAI</strong></p>
+            </div>
           </div>
 
           <div className="settings-section sign-out-section">
