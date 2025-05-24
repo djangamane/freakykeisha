@@ -383,7 +383,7 @@ function App() {
       }
     }
 
-    if (userProfile.message_count_today >= (userProfile.subscription_tier === 'premium' ? 1000 : 20) && userProfile.subscription_tier !== 'unlimited') {
+    if (userProfile.message_count_today >= (userProfile.subscription_tier === 'premium' ? 1000 : 10) && userProfile.subscription_tier !== 'unlimited') {
       setMessages((prevMessages) => [...prevMessages, {id: uuidv4(), text: "You've reached your daily message limit for your current plan.", sender: 'system', error: true}]);
       setShowPaywallModal(true);
       setIsAiThinking(false); // Stop thinking indicator
