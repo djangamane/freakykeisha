@@ -8,13 +8,73 @@ const SUPABASE_URL = process.env.REACT_APP_SUPABASE_URL;
 const SUPABASE_ANON_KEY = process.env.REACT_APP_SUPABASE_ANON_KEY;
 
 if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-  console.error("Supabase URL or Anon Key is missing. Make sure .env file is set up correctly with REACT_APP_SUPABASE_URL and REACT_APP_SUPABASE_ANON_KEY, and that you have restarted the development server.");
-  // Optionally, render an error message to the user or halt app initialization
+  const errorMsg = "CRITICAL ERROR: Supabase URL or Anon Key is missing. Check your .env file. App will not function correctly.";
+  console.error(errorMsg);
+  alert(errorMsg); // Make it very obvious
+  // Consider throwing an error here to halt execution if preferred
+  // throw new Error(errorMsg);
 }
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const kb3ImageUrl = process.env.PUBLIC_URL + '/kb3.png';
+
+// Keisha AI System Prompt
+const KEISHA_SYSTEM_PROMPT = `Your name is Keisha...`;
+
+// Helper function to test Supabase query independently
+function testSupabaseProfileQuery(userId) {
+  console.log(`[testSupabaseProfileQuery] Called for userId: ${userId}`);
+
+  // Ensure Supabase client is available
+  if (!supabase) {
+    console.error("[testSupabaseProfileQuery] Supabase client is not initialized!");
+    return Promise.reject(new Error("Supabase client not initialized"));
+  }
+  if (typeof supabase.from !== 'function') {
+    console.error("[testSupabaseProfileQuery] supabase.from is not a function. Client state:", supabase);
+    return Promise.reject(new Error("supabase.from is not a function"));
+  }
+
+  console.log(`[testSupabaseProfileQuery] About to create Supabase promise for userId: ${userId}`);
+  const queryPromise = supabase
+    .from('profiles')
+    .select('id, username, avatar_url, subscription_tier, website') // Ensure these columns exist in your 'profiles' table
+    .eq('id', userId)
+    .single();
+
+  // Check if a promise-like object was returned
+  if (!queryPromise || typeof queryPromise.then !== 'function') {
+    console.error("[testSupabaseProfileQuery] Supabase query did not return a valid promise object.");
+    // Attempt to log what it did return, safely
+    try {
+        console.log("[testSupabaseProfileQuery] Supabase returned:", JSON.stringify(queryPromise));
+    } catch (e) {
+        console.log("[testSupabaseProfileQuery] Supabase returned (could not stringify):", queryPromise);
+    }
+    return Promise.reject(new Error("Supabase query did not return a valid promise."));
+  }
+  
+  console.log(`[testSupabaseProfileQuery] Supabase promise created. Attaching .then(), .catch(), and .finally().`);
+
+  queryPromise
+    .then(response => {
+      // This log is crucial. If it appears, the promise resolved.
+      console.log(`[testSupabaseProfileQuery] Query .then() ATTACHED HERE was CALLED. Response:`, response);
+      // response will be { data, error, status, etc. }
+    })
+    .catch(error => {
+      // This log is crucial. If it appears, the promise rejected.
+      console.error(`[testSupabaseProfileQuery] Query .catch() ATTACHED HERE was CALLED. Error:`, error);
+    })
+    .finally(() => {
+      // This log is crucial. If it appears, the promise settled (either way).
+      console.log(`[testSupabaseProfileQuery] Query .finally() ATTACHED HERE was CALLED.`);
+    });
+
+  console.log(`[testSupabaseProfileQuery] Returning the original Supabase promise to be awaited by caller.`);
+  return queryPromise; // Return the original promise for fetchUserProfile to await
+}
 
 function App() {
   const [panelOpen, setPanelOpen] = useState(true);
@@ -22,6 +82,9 @@ function App() {
   const [messages, setMessages] = useState([]);
   const [currentSessionId, setCurrentSessionId] = useState(null);
   const [session, setSession] = useState(null); 
+  const [userProfile, setUserProfile] = useState(null); 
+  const [showPaywallModal, setShowPaywallModal] = useState(false); // New state for paywall
+  const [isAiThinking, setIsAiThinking] = useState(false); 
   const [loadingAuthState, setLoadingAuthState] = useState(true); 
   const [email, setEmail] = useState(''); 
   const [password, setPassword] = useState(''); 
@@ -30,83 +93,124 @@ function App() {
   const [currentView, setCurrentView] = useState('chat'); 
   const [selectedUpgradeTier, setSelectedUpgradeTier] = useState(null); 
   const [paymentError, setPaymentError] = useState(''); 
-  const [userProfile, setUserProfile] = useState(null); 
-  const [isAiThinking, setIsAiThinking] = useState(false); 
+  const [isInitializingNewSession, setIsInitializingNewSession] = useState(false);
   const fetchingUserIdRef = useRef(null);
   const messagesEndRef = useRef(null);
+  const inputRef = useRef(null);
+  const isFetchingProfile = useRef(false);
+  const [loadingProfile, setLoadingProfile] = useState(false); // Initialize to false, true when fetching
+  const [profileError, setProfileError] = useState(null);
 
-  // New state for conversation history
-  const [conversationHistory, setConversationHistory] = useState([]);
-  const [isLoadingConversations, setIsLoadingConversations] = useState(false);
+  // Function to scroll to the bottom of the chat
+  const scrollToBottom = useCallback(() => {
+    if (messagesEndRef.current) {
+      console.log('[scrollToBottom] Attempting to scroll.');
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    } else {
+      console.warn('[scrollToBottom] messagesEndRef.current is null or undefined. Cannot scroll.');
+    }
+  }, []); // No dependencies needed if messagesEndRef itself is stable
 
-  // Auto-scroll to the latest message
+  // Effect to scroll to bottom when messages change
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+    console.log('[useEffect for Messages] Messages array changed, calling scrollToBottom.');
+    scrollToBottom();
+  }, [messages, scrollToBottom]); // Add scrollToBottom because it's now memoized with useCallback
 
-  const fetchUserProfile = useCallback(async (userId) => {
+  // Effect to focus input when chat view is active and inputRef is available
+  useEffect(() => {
+    if (currentView === 'chat' && inputRef.current) {
+      console.log('[useEffect for Input Focus] Chat view is active, focusing input.');
+      inputRef.current.focus();
+    }
+  }, [currentView, inputRef]);
+
+  const fetchUserProfile = useCallback(async (userId, userEmailIfAvailable) => { 
+    console.log(`[fetchUserProfile] Called for userId: ${userId}`);
+    if (fetchingUserIdRef.current === userId) {
+      console.log(`[fetchUserProfile] Already fetching for userId: ${userId}, skipping.`);
+      return;
+    }
     if (!userId) {
-      setUserProfile({
+      console.log('[fetchUserProfile] No userId provided, setting default guest profile.');
+      setUserProfile({ 
         subscription_tier: 'Free',
         message_count_today: 0,
         last_message_reset_at: null,
         subscription_expires_at: null,
-        username: 'User'
+        username: 'User', // Default for non-logged-in or new users
+        id: null // No actual DB ID for guest
       });
       fetchingUserIdRef.current = null;
       return;
     }
 
-    if (fetchingUserIdRef.current === userId) {
-      return; // Already fetching this user's profile
-    }
-
     fetchingUserIdRef.current = userId;
+    console.log(`[fetchUserProfile] Attempting to fetch profile for userId: ${userId} from Supabase.`);
+    setLoadingProfile(true);
 
     try {
-      const { data, error, status } = await supabase
-        .from('profiles')
-        .select('subscription_tier, message_count_today, last_message_reset_at, subscription_expires_at, username, avatar_url, website, id') // Added id to profile
-        .eq('id', userId)
-        .single();
+      console.log(`[fetchUserProfile] Checking Supabase client:`, supabase);
+      console.log(`[fetchUserProfile] Checking supabase.from type:`, typeof supabase.from);
+      console.log(`[fetchUserProfile] TRY block entered for userId: ${userId}. Calling testSupabaseProfileQuery.`); 
+      
+      // Call the isolated test function
+      const profileQueryResponse = await testSupabaseProfileQuery(userId);
+      
+      console.log(`[fetchUserProfile] Response from awaited testSupabaseProfileQuery:`, profileQueryResponse);
 
-      if (error && status !== 406) { 
-        console.error('Error fetching profile:', error);
-        setUserProfile({ 
+      // The structure of profileQueryResponse should be { data, error, status, ... }
+      const { data: profileData, error: profileError } = profileQueryResponse;
+
+      if (profileError) {
+        console.error('[fetchUserProfile] Error fetching profile:', profileError);
+        const defaultErrorProfile = {
           subscription_tier: 'Free', 
           message_count_today: 0, 
           last_message_reset_at: null, 
           subscription_expires_at: null,
-          username: 'User',
-          id: userId // Store id even if fetch fails partially
-        });
-      } else if (data) {
-        setUserProfile(data);
-        console.log("User profile data loaded.");
+          username: userEmailIfAvailable || 'User', 
+          id: userId 
+        };
+        console.log('[fetchUserProfile] Setting default profile due to error:', defaultErrorProfile);
+        setUserProfile(defaultErrorProfile);
+      } else if (profileData) {
+        console.log('[fetchUserProfile] Profile data fetched successfully:', profileData);
+        setUserProfile(profileData);
       } else {
-        setUserProfile({ 
+        console.warn('[fetchUserProfile] No profile data and no error. This might mean the profile does not exist or RLS denied access silently (should not happen with .single()). Profile data:', profileData);
+        // If .single() is used and no row is found (and RLS allows the query), 
+        // Supabase v2 often returns data: null and error: null with a status that indicates not found (e.g., 406 or PostgrestError with code PGRST116).
+        // Supabase v3 might behave differently. Let's check the whole response.
+        const newDefaultProfile = {
           subscription_tier: 'Free', 
           message_count_today: 0, 
           last_message_reset_at: null, 
           subscription_expires_at: null,
-          username: session?.user?.email || 'User', // Fallback username
-          id: userId // Store id
-        });
+          username: userEmailIfAvailable || 'User', 
+          id: userId 
+        };
+        console.log('[fetchUserProfile] No profile data in array (new user?), setting default profile:', newDefaultProfile);
+        setUserProfile(newDefaultProfile);
       }
     } catch (e) {
-      console.error("Exception fetching profile:", e);
-      setUserProfile({ 
+      console.error(`[fetchUserProfile] CATCH block entered for userId: ${userId}. Exception during profile fetch:`, e); 
+      const exceptionProfile = {
         subscription_tier: 'Free', 
         message_count_today: 0, 
         last_message_reset_at: null, 
         subscription_expires_at: null,
-        username: 'User',
-        id: userId // Store id
-      });
+        username: userEmailIfAvailable || 'User', 
+        id: userId 
+      };
+      console.log('[fetchUserProfile] Setting default profile due to exception:', exceptionProfile);
+      setUserProfile(exceptionProfile);
     } finally {
+      console.log(`[fetchUserProfile] FINALLY block for userId: ${userId}. Setting loadingProfile=false, fetchingUserIdRef.current=null.`);
+      setLoadingProfile(false);
       fetchingUserIdRef.current = null;
     }
-  }, []); // Empty dependency array makes fetchUserProfile stable
+  }, [setUserProfile]); // Added dependency based on usage
 
   // Function to fetch messages for a given session ID
   const fetchAndSetMessagesForSession = useCallback(async (sessionId) => {
@@ -114,37 +218,35 @@ function App() {
         setMessages([]);
         return;
     }
-    // Optional: Add a loading state for messages if desired
-    // setLoadingMessages(true);
     try {
         const { data: sessionMessagesData, error } = await supabase
             .from('messages')
-            .select('id, user_prompt, ai_response, created_at, session_id')
+            .select('id, user_prompt, ai_response, created_at, session_id') // Ensure `id` is selected for stable keys
             .eq('session_id', sessionId)
             .order('created_at', { ascending: true });
 
         if (error) {
             console.error('Error fetching messages for session:', error);
-            setMessages([]); // Clear messages on error
+            setMessages([]); 
             return;
         }
 
         const loadedDisplayMessages = [];
-        sessionMessagesData.forEach(msg => {
-            if (msg.user_prompt) {
+        sessionMessagesData.forEach(dbRow => {
+            if (dbRow.user_prompt) {
                 loadedDisplayMessages.push({ 
-                    id: `${msg.id}-user-${uuidv4()}`, // Ensure unique key
-                    text: msg.user_prompt, 
+                    id: dbRow.id + '_user', // Stable ID based on DB row ID + suffix
+                    text: dbRow.user_prompt, 
                     sender: 'user',
-                    timestamp: msg.created_at 
+                    timestamp: dbRow.created_at 
                 });
             }
-            if (msg.ai_response) {
+            if (dbRow.ai_response) {
                 loadedDisplayMessages.push({ 
-                    id: `${msg.id}-ai-${uuidv4()}`, // Ensure unique key
-                    text: msg.ai_response, 
+                    id: dbRow.id + '_ai', // Stable ID based on DB row ID + suffix
+                    text: dbRow.ai_response, 
                     sender: 'ai',
-                    timestamp: msg.created_at 
+                    timestamp: dbRow.created_at 
                 });
             }
         });
@@ -153,167 +255,153 @@ function App() {
         console.error("Exception fetching messages:", e);
         setMessages([]);
     } finally {
-        // setLoadingMessages(false);
     }
-  }, []); // supabase is stable, no need to list as dep
-
-  // Function to fetch conversation history
-  const fetchConversationHistory = useCallback(async (userId) => {
-    if (!userId) {
-        setConversationHistory([]);
-        return;
-    }
-    setIsLoadingConversations(true);
-    try {
-        const { data: allMessages, error } = await supabase
-            .from('messages')
-            .select('session_id, user_prompt, created_at')
-            .eq('user_id', userId)
-            .not('session_id', 'is', null)
-            .order('created_at', { ascending: true }); // Get earliest messages first to pick first prompt
-
-        if (error) {
-            console.error('Error fetching conversation history:', error);
-            setConversationHistory([]);
-            return;
-        }
-
-        const sessionsMap = new Map();
-        allMessages.forEach(msg => {
-            if (msg.session_id && !sessionsMap.has(msg.session_id)) {
-                sessionsMap.set(msg.session_id, {
-                    id: msg.session_id,
-                    title: msg.user_prompt.substring(0, 35) + (msg.user_prompt.length > 35 ? '...' : ''),
-                    timestamp: msg.created_at 
-                });
-            }
-        });
-
-        const sortedHistory = Array.from(sessionsMap.values()).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)); // Show newest sessions first
-        setConversationHistory(sortedHistory);
-
-    } catch (e) {
-        console.error("Exception fetching conversation history:", e);
-        setConversationHistory([]);
-    } finally {
-        setIsLoadingConversations(false);
-    }
-  }, []); // supabase is stable
+  }, []); // Dependencies: supabase client instance if it were outside, but it's global here.
 
   useEffect(() => {
+    console.log('[Auth Effect] Started. loadingAuthState = true');
     setLoadingAuthState(true);
     const { data: authListener } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setSession(session);
-        const currentPath = window.location.pathname; 
-        const newUserId = session?.user?.id;
-        const currentProfileUserId = userProfile?.id;
-
-        if (_event === 'SIGNED_IN') {
-          console.log("User signed in.");
-          if (newUserId) {
-            if (newUserId !== currentProfileUserId && fetchingUserIdRef.current !== newUserId) {
-                fetchUserProfile(newUserId); 
-            }
-            fetchConversationHistory(newUserId); // Fetch history on sign in
-          }
-          if (currentPath !== '/payment-success' && currentPath !== '/payment-cancelled') {
-            setCurrentView('chat'); 
-          }
-          // Reset messages and session ID only if user actually changes or it's a fresh sign-in
-          if (!currentProfileUserId || (newUserId && newUserId !== currentProfileUserId)) {
-             setMessages([]); 
-             setCurrentSessionId(null); 
-          }
-        } else if (_event === 'SIGNED_OUT') {
-          console.log("User signed out.");
-          if (currentPath !== '/payment-success' && currentPath !== '/payment-cancelled') {
-             setCurrentView('chat');
-          }
-          setMessages([]);
-          setCurrentSessionId(null);
-          setEmail(''); 
-          setPassword(''); 
+      async (_event, sessionState) => { 
+        console.log('[Auth Listener] Event:', _event, 'Session:', sessionState);
+        setSession(sessionState); 
+        if (sessionState?.user) {
+          console.log('[Auth Listener] User found, profile fetch will be handled by dedicated effect.');
+        } else {
+          console.log('[Auth Listener] No user session, clearing profile.');
           setUserProfile(null); 
-          setConversationHistory([]); // Clear history on sign out
-        } else if (_event === 'USER_UPDATED') {
-          // Handle user updates if necessary, e.g., email change confirmed
-          if (session && session.user && session.user.id !== currentProfileUserId && fetchingUserIdRef.current !== session.user.id) {
-            fetchUserProfile(session.user.id);
-          }
         }
-        
-        // Path-based view changes, should ideally not interfere with auth state logic causing loops
-        if (currentPath === '/payment-success' && currentView !== 'paymentSuccess') {
-            setCurrentView('paymentSuccess');
-        } else if (currentPath === '/payment-cancelled' && currentView !== 'paymentCancelled') {
-            setCurrentView('paymentCancelled');
-        } else if (!session && currentPath !== '/payment-success' && currentPath !== '/payment-cancelled' && currentView !== 'chat'){
-             // If no session and not on payment pages, ensure view is chat (e.g. after logout and path change)
-            setCurrentView('chat');
-        }
+        console.log('[Auth Listener] Setting loadingAuthState = false');
         setLoadingAuthState(false);
       }
     );
 
-    // Initial session check on mount
-    supabase.auth.getSession().then(({ data: { session: initialSess } }) => { 
-        if (initialSess && initialSess.user) {
-            if (!userProfile || userProfile.id !== initialSess.user.id && fetchingUserIdRef.current !== initialSess.user.id) {
-                fetchUserProfile(initialSess.user.id);
-            } else {
-                 setLoadingAuthState(false); // Already have profile for current session
-            }
-            fetchConversationHistory(initialSess.user.id); // Fetch history for initial session
-        } else {
-             setUserProfile(null); // Ensure profile is cleared if no initial session
-             setConversationHistory([]); // Clear history if no initial session
-             setLoadingAuthState(false); // No initial session
-        }
-    }).finally(() => setLoadingAuthState(false)); // General fallback
+    (async () => {
+      console.log('[Auth Effect IIFE] Getting initial session...');
+      const { data: { session: initialSession } } = await supabase.auth.getSession();
+      console.log('[Auth Effect IIFE] Initial session:', initialSession);
+      setSession(initialSession); 
+      if (initialSession?.user) {
+        console.log('[Auth Effect IIFE] Initial user found, profile fetch will be handled by dedicated effect.');
+      }
+      console.log('[Auth Effect IIFE] Setting loadingAuthState = false');
+      setLoadingAuthState(false);
+    })();
 
     return () => {
-      authListener?.data?.subscription?.unsubscribe();
+      console.log('[Auth Effect] Cleanup. Unsubscribing auth listener.');
+      authListener?.data?.subscription?.unsubscribe(); 
     };
-  }, [fetchUserProfile, fetchConversationHistory, userProfile?.id]);
+  }, []); // Changed dependency from [fetchUserProfile] to []
 
-  // useEffect to fetch messages when currentSessionId changes
   useEffect(() => {
-    if (currentSessionId && session?.user?.id) { 
-        fetchAndSetMessagesForSession(currentSessionId);
-    } else if (!currentSessionId) { // If session ID is explicitly nulled (e.g. new chat before first message)
-        setMessages([]); 
+    if (session?.user && !userProfile && !loadingAuthState) {
+      console.log(`[Profile Fetch Effect] Conditions met: User session found (user ID: ${session.user.id}), userProfile is NOT loaded, loadingAuthState is false. Attempting to fetch profile.`);
+      fetchUserProfile(session.user.id, session.user.email);
+    } else if (session?.user && userProfile) {
+      console.log(`[Profile Fetch Effect] Profile already loaded for user ID: ${session.user.id}.`);
+    } else if (!session?.user) {
+      console.log(`[Profile Fetch Effect] No user session.`);
+    } else if (loadingAuthState) {
+      console.log(`[Profile Fetch Effect] Still loading auth state.`);
     }
-  }, [currentSessionId, session?.user?.id, fetchAndSetMessagesForSession]);
+  }, [session, userProfile, loadingAuthState, fetchUserProfile]);
 
-  const handleSendMessage = async (e) => {
-    if (e) e.preventDefault();
-    if (!inputValue.trim() || !session) return;
+  useEffect(() => {
+    if (currentSessionId && session?.user?.id && !isInitializingNewSession) { // Check the flag
+      fetchAndSetMessagesForSession(currentSessionId);
+    } else if (!currentSessionId) { 
+      // This case handles 'New Chat' button press or initial load without a session
+      setMessages([]); 
+    }
+    // fetchAndSetMessagesForSession is stable due to useCallback with empty deps.
+    // isAiThinking is a boolean.
+    // messages.length is a number.
+  }, [currentSessionId, session?.user?.id, fetchAndSetMessagesForSession, isInitializingNewSession]); // Added isInitializingNewSession to dependencies
 
+  const handleSendMessage = async () => {
+    console.log(`[handleSendMessage] Attempting to send. loadingAuthState: ${loadingAuthState}, userProfile set: ${!!userProfile}`);
+
+    if (inputValue.trim() === "") return;
+
+    // User login check
+    if (!session?.user?.id) {
+        console.error("User not logged in, cannot send message.");
+        setMessages((prevMessages) => [...prevMessages, {id: uuidv4(), text: "You must be logged in to chat.", sender: 'system', error: true}]);
+        setIsAiThinking(false);            
+        return;
+    }
+
+    // User Profile Check - This should come BEFORE setting AI thinking or adding user message to UI for sending
+    // fetchUserProfile is primarily handled by useEffect listening to session changes.
+    // We just check if userProfile state is populated here.
+    if (!userProfile) {
+      console.warn("User profile not loaded yet. Message sending deferred.");
+      setMessages((prevMessages) => [
+        ...prevMessages,
+        {
+          id: uuidv4(),
+          text: "Your profile is still loading, please try sending again shortly.",
+          sender: 'system',
+          error: true
+        }
+      ]);
+      setIsAiThinking(false); // Ensure 'thinking' stops if profile isn't loaded
+      return;
+    }
+
+    // Daily message limit check (should come after profile is confirmed loaded)
+    const today = new Date().toDateString();
+    if (userProfile.last_message_reset_at !== today) {
+      // Reset count if it's a new day
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .update({ message_count_today: 0, last_message_reset_at: today })
+          .eq('id', userProfile.id)
+          .select()
+          .single();
+        if (error) throw error;
+        setUserProfile(data); // Update profile state with reset count
+      } catch (error) {
+        console.error("Error resetting daily message count:", error);
+        // Optionally, inform the user or handle gracefully. For now, we'll proceed.
+      }
+    }
+
+    if (userProfile.message_count_today >= (userProfile.subscription_tier === 'premium' ? 1000 : 20) && userProfile.subscription_tier !== 'unlimited') {
+      setMessages((prevMessages) => [...prevMessages, {id: uuidv4(), text: "You've reached your daily message limit for your current plan.", sender: 'system', error: true}]);
+      setShowPaywallModal(true);
+      setIsAiThinking(false); // Stop thinking indicator
+      return;
+    }
+
+    // If profile is loaded and limit not reached, proceed to add user message and set AI thinking
     const userMessageContent = inputValue.trim();
-    const newUserMessage = {
-      id: uuidv4(),
+    const tempUserMessageId = `temp_${uuidv4()}`; // Create a temporary ID
+    const newUserMessageOptimistic = {
+      id: tempUserMessageId, // Use temporary ID
       text: userMessageContent,
       sender: "user",
       timestamp: new Date().toISOString(),
     };
 
-    setMessages((prevMessages) => [...prevMessages, newUserMessage]);
+    setMessages((prevMessages) => [...prevMessages, newUserMessageOptimistic]);
     setInputValue("");
-    setIsAiThinking(true);
+    setIsAiThinking(true); // Set AI thinking only AFTER profile check passes and message is added
 
-    // Determine current session ID for the API call
     let activeSessionId = currentSessionId;
     if (!activeSessionId) {
         activeSessionId = uuidv4();
+        setIsInitializingNewSession(true); // Set flag for new session initialization
         setCurrentSessionId(activeSessionId); 
     }
 
     const requestBody = {
       message: userMessageContent,
       model: "goekdenizguelmez/JOSIEFIED-Qwen3", 
-      sessionId: activeSessionId, // Ensure activeSessionId is used
-      userId: session.user.id, // Pass userId to backend
+      sessionId: activeSessionId, 
+      userId: session.user.id, 
     };
 
     try {
@@ -321,8 +409,6 @@ function App() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          // Include Authorization header if your backend expects it for /api/chat
-          // "Authorization": `Bearer ${session.access_token}` 
         },
         body: JSON.stringify(requestBody),
       });
@@ -333,56 +419,100 @@ function App() {
           const errorData = await response.json();
           backendErrorMsg = errorData.message || errorData.error || backendErrorMsg;
         } catch (e) {
-          // Ignore if error response is not JSON
         }
         console.error("Backend error:", backendErrorMsg);
-        // Revert optimistic update or show error message in chat
-        setMessages((prevMessages) => prevMessages.filter(msg => msg.id !== newUserMessage.id)); 
+        // Remove the optimistic message if backend fails before AI response
+        setMessages((prevMessages) => prevMessages.filter(msg => msg.id !== tempUserMessageId)); 
         setMessages((prevMessages) => [...prevMessages, {id: uuidv4(), text: `Error: ${backendErrorMsg}`, sender: 'ai', error: true}]);
         return;
       }
 
-      const data = await response.json();
-      const aiResponse = {
-        id: data.aiMessageId || uuidv4(), 
-        text: data.message, 
-        sender: "ai",
-        timestamp: new Date().toISOString(), 
-      };
-      setMessages((prevMessages) => [...prevMessages, aiResponse]);
+      const data = await response.json(); // data should now contain { userMessage, aiMessage, sessionId }
+      
+      // Remove the optimistic user message
+      setMessages((prevMessages) => prevMessages.filter(msg => msg.id !== tempUserMessageId));
 
-      // Refresh conversation history; a new message could mean a new session or an updated 'last active' time if sorting by that.
-      // Since our titles are based on the first prompt, it primarily helps if a new session was created.
-      fetchConversationHistory(session.user.id); 
+      // Process and add confirmed user message and AI message
+      if (data.userMessage && data.aiMessage) {
+        console.log('[handleSendMessage] Raw data.userMessage received:', JSON.stringify(data.userMessage, null, 2));
+        console.log('[handleSendMessage] Raw data.aiMessage received:', JSON.stringify(data.aiMessage, null, 2));
 
+        const cleanedAiText = data.aiMessage.text ? data.aiMessage.text.replace(/<think>.*?<\/think>/gs, "").trim() : "AI response text missing";
+        
+        const confirmedUserMessage = {
+          ...data.userMessage,
+          id: data.userMessage.id || `user_fallback_${uuidv4()}`, // Fallback ID
+          sender: 'user',
+          timestamp: data.userMessage.timestamp || new Date().toISOString(),
+        };
+        console.log('[handleSendMessage] Constructed confirmedUserMessage:', JSON.stringify(confirmedUserMessage, null, 2));
+
+        const finalAiMessage = {
+          ...data.aiMessage,
+          text: cleanedAiText,
+          id: data.aiMessage.id || `ai_fallback_${uuidv4()}`, // Fallback ID
+          sender: 'ai',
+          timestamp: data.aiMessage.timestamp || new Date().toISOString(),
+        };
+        console.log('[handleSendMessage] Constructed finalAiMessage:', JSON.stringify(finalAiMessage, null, 2));
+
+        setMessages(prevMessages => {
+          console.log('[handleSendMessage] prevMessages (before adding confirmed user & AI):', JSON.stringify(prevMessages, null, 2));
+          
+          // Check for duplicate IDs before adding new messages
+          const existingIds = new Set(prevMessages.map(msg => msg.id));
+          
+          // Ensure unique IDs for new messages
+          if (existingIds.has(confirmedUserMessage.id)) {
+            confirmedUserMessage.id = `user_${uuidv4()}`;
+          }
+          
+          if (existingIds.has(finalAiMessage.id)) {
+            finalAiMessage.id = `ai_${uuidv4()}`;
+          }
+          
+          // Create new messages array with deep copies to avoid reference issues
+          const newMessages = [...prevMessages, {...confirmedUserMessage}, {...finalAiMessage}];
+          
+          console.log('[handleSendMessage] newMessages (with confirmed user & AI response):', JSON.stringify(newMessages, null, 2));
+          
+          if (newMessages.some(msg => !msg || typeof msg.id === 'undefined' || msg.id === null)) {
+            console.error('[CRITICAL] Attempting to set messages with a malformed entry (missing/null ID)!', JSON.stringify(newMessages, null, 2));
+          }
+          
+          return newMessages;
+        });
+      } else {
+        console.warn('[handleSendMessage] data.userMessage or data.aiMessage was null or undefined. Full data object:', JSON.stringify(data, null, 2));
+      }
+
+      setIsAiThinking(false);
+      setInputValue('');
     } catch (error) {
       console.error("Network or other error sending message:", error);
-      setMessages((prevMessages) => prevMessages.filter(msg => msg.id !== newUserMessage.id));
+      // Remove the optimistic message if any other error occurs
+      setMessages((prevMessages) => prevMessages.filter(msg => msg.id !== tempUserMessageId));
       setMessages((prevMessages) => [...prevMessages, {id: uuidv4(), text: `Error: ${error.message}`, sender: 'ai', error: true}]);
     } finally {
       setIsAiThinking(false);
+      if (isInitializingNewSession) {
+        setIsInitializingNewSession(false); // Reset flag after the full send/receive cycle
+      }
     }
   };
 
-  // Handler for starting a new chat
   const handleNewChat = () => {
-    // const newSessionId = uuidv4(); // No need to set here, handleSendMessage will if currentSessionId is null
-    setCurrentSessionId(null); // Signal that it's a new chat, messages will clear via useEffect
-    setMessages([]); // Explicitly clear messages for immediate UI feedback
+    setCurrentSessionId(null); // This will trigger the useEffect to clear messages
+    // setMessages([]); // No longer strictly needed here as useEffect handles it, but harmless
     setInputValue('');
-    // setPanelOpen(false); // Optional: close panel
-  };
-
-  // Handler for loading a selected conversation
-  const handleLoadConversation = (sessionId) => {
-    setCurrentSessionId(sessionId); // This will trigger the useEffect to fetch messages
-    // setPanelOpen(false); // Optional: close panel
+    setIsAiThinking(false);
+    setIsInitializingNewSession(false); // Ensure flag is reset if a new chat is started abruptly
   };
 
   const handleSignIn = async (e) => {
     e.preventDefault();
-    setAuthError(''); // Clear previous errors
-    setAuthMessage(''); // Clear previous messages
+    setAuthError(''); 
+    setAuthMessage(''); 
     const { error } = await supabase.auth.signInWithPassword({
       email: email,
       password: password,
@@ -391,7 +521,6 @@ function App() {
       setAuthError(error.message);
       console.error('Sign in error:', error.message);
     } else {
-      // Sign in successful, onAuthStateChange will handle setting the session
       console.log('Sign in successful');
     }
   };
@@ -401,33 +530,26 @@ function App() {
   };
 
   const handleUpgradePayment = async (tier) => {
-    if (!session || !session.user) {
-      console.error("User not signed in. Cannot proceed with payment.");
-      setPaymentError("You must be signed in to make a payment.");
+    setSelectedUpgradeTier(tier);
+    setPaymentError(''); 
+
+    if (!session?.user?.id) {
+      setPaymentError("User not logged in. Please sign in to upgrade.");
       return;
     }
+    await fetchUserProfile(session.user.id, session.user.email); 
 
-    if (!tier) {
-      console.error("No upgrade tier selected.");
-      setPaymentError("No upgrade tier selected. Please go back and select a plan.");
-      return;
-    }
-    setPaymentError(''); // Clear previous errors
-
-    let amountUSD;
-    let itemDescription;
-
-    // Define your tier details here
-    // IMPORTANT: Match these tier slugs with what you set in selectedUpgradeTier
-    if (tier === 'Starter') { // Assuming 'Starter' is the value for selectedUpgradeTier
-      amountUSD = 9.00; 
-      itemDescription = 'Keisha AI - Starter Plan (Monthly)';
-    } else if (tier === 'Pro') { // Assuming 'Pro' is the value for selectedUpgradeTier
-      amountUSD = 59.00; 
-      itemDescription = 'Keisha AI - Pro Plan (Annual)';
-    } else if (tier === 'Gold') { // Assuming 'Gold' is the value for selectedUpgradeTier
-      amountUSD = 99.00; 
-      itemDescription = 'Keisha AI - Gold Plan (Lifetime Deal)';
+    let amount;
+    let currency = 'USD'; 
+    if (tier === 'Starter') { 
+      amount = 9.00; 
+      currency = 'USD';
+    } else if (tier === 'Pro') { 
+      amount = 59.00; 
+      currency = 'USD';
+    } else if (tier === 'Gold') { 
+      amount = 99.00; 
+      currency = 'USD';
     } else {
       console.error("Invalid tier selected:", tier);
       setPaymentError("Invalid subscription tier selected.");
@@ -435,30 +557,29 @@ function App() {
     }
 
     const paymentRequestBody = {
-      amountUSD: amountUSD, 
-      itemDescription: itemDescription, 
+      amount: amount, 
+      currency: currency, 
       userEmail: session.user.email,
       userId: session.user.id,
       tier: tier 
     };
 
     try {
-      console.log("Attempting to create Coinbase charge (frontend) with requestBody:", paymentRequestBody); // Log the request body
+      console.log("Attempting to create Coinbase charge (frontend) with requestBody:", paymentRequestBody); 
       const response = await fetch("http://localhost:3001/api/create-coinbase-charge", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          // "Authorization": `Bearer ${session.access_token}`, // Uncomment if backend needs auth
         },
         body: JSON.stringify(paymentRequestBody),
       });
 
-      console.log("Frontend: Received response from backend. Status:", response.status, "StatusText:", response.statusText); // Log status
+      console.log("Frontend: Received response from backend. Status:", response.status, "StatusText:", response.statusText); 
 
       if (!response.ok) {
         let errorData;
         try {
-            errorData = await response.json(); // Try to parse error JSON
+            errorData = await response.json(); 
             console.error("Frontend: Backend responded with an error:", errorData);
         } catch (e) {
             console.error("Frontend: Backend responded with an error, but couldn't parse JSON body:", await response.text());
@@ -466,24 +587,23 @@ function App() {
         throw new Error(errorData?.details || errorData?.error || `HTTP error! status: ${response.status}`);
       }
 
-      // IMPORTANT: Log the raw text first, then try to parse JSON
       const responseText = await response.text();
       console.log("Frontend: Raw response text from backend:", responseText);
 
       let data;
       try {
-          data = JSON.parse(responseText); // Manually parse the logged text
+          data = JSON.parse(responseText); 
       } catch (e) {
           console.error("Frontend: Failed to parse JSON from backend response text:", e, "Raw text was:", responseText);
           throw new Error("Failed to parse response from backend.");
       }
       
-      console.log("Frontend: Parsed JSON data from backend:", data); // This is the critical log
+      console.log("Frontend: Parsed JSON data from backend:", data); 
 
-      if (data && data.hosted_url) { // Check data AND data.hosted_url
+      if (data && data.hosted_url) { 
         window.location.href = data.hosted_url; 
       } else {
-        console.error("Frontend: hosted_url not found in parsed data. Data was:", data); // Log data if hosted_url is missing
+        console.error("Frontend: hosted_url not found in parsed data. Data was:", data); 
         throw new Error("Hosted URL not found in response from backend.");
       }
 
@@ -493,10 +613,11 @@ function App() {
     }
   };
 
-  if (loadingAuthState) {
-    return <div className="loading-auth">Loading authentication...</div>; 
+  if (loadingAuthState || loadingProfile) {
+    return <div className="loading-auth-container">Authenticating...</div>;
   }
 
+  // If we reach here, loadingAuthState AND loadingProfile are BOTH false.
   if (!session) {
     return (
       <div className="landing-page"> 
@@ -545,55 +666,51 @@ function App() {
               {panelOpen ? "←" : "☰"}
             </button>
             {panelOpen && (
-              <div className="panel-content">
-                <h3>Conversations</h3>
-                <button onClick={handleNewChat} className="new-chat-button">+ New Chat</button>
-                {isLoadingConversations ? (
-                  <p className="loading-conversations">Loading history...</p>
-                ) : conversationHistory.length === 0 ? (
-                  <p className="no-conversations">No past conversations.</p>
-                ) : (
-                  <ul className="conversation-list">
-                    {conversationHistory.map((conv) => (
-                      <li
-                        key={conv.id}
-                        className={`conversation-item ${conv.id === currentSessionId ? 'selected' : ''}`}
-                        onClick={() => handleLoadConversation(conv.id)}
-                      >
-                        {conv.title}
-                      </li>
-                    ))}
+              <div className="side-panel-content">
+                <div className="conversation-history-section">
+                  <h3>Conversations</h3>
+                  <button className="new-chat-btn" onClick={handleNewChat}>+ New Chat</button>
+                </div>
+                <div className="options-section">
+                  <hr />
+                  <h3>Options</h3>
+                  <ul className="options-list">
+                    <li onClick={() => setCurrentView('settings')}>Settings</li>
+                    <li onClick={handleSignOut}>Sign Out</li>
                   </ul>
-                )}
-                <hr />
-                <h3>Options</h3>
-                <ul className="options-list">
-                  <li onClick={() => setCurrentView('settings')}>Settings</li>
-                  {/* Add Sign Out to side panel for consistency */}
-                  <li onClick={handleSignOut}>Sign Out</li> 
-                </ul>
+                </div>
               </div>
             )}
           </div>
           <div className="chat-box">
             <div className="chat-content">
-              {messages.map((msg) => (
-                <div key={msg.id} className={`message ${msg.sender}`}>
-                  <p>{msg.text}</p>
-                </div>
-              ))}
+              {messages.map((msg, index) => {
+                if (!msg || typeof msg.id === 'undefined' || msg.id === null || typeof msg.text !== 'string' || typeof msg.sender !== 'string') {
+                  console.error('Malformed message object at index:', index, msg);
+                  return (
+                    <div key={`error-${index}-${new Date().getTime()}`} className="message system error">
+                      <p>Error: Corrupted message data. Please try again or contact support if this persists.</p>
+                    </div>
+                  );
+                }
+                return (
+                  <div key={msg.id} className={`message ${msg.sender}`}>
+                    <p>{msg.text}</p>
+                  </div>
+                );
+              })}
               {isAiThinking && (
                 <div className="message ai-message thinking-message">
                   <p className="message-text">Keisha is thinking...</p>
                 </div>
               )}
-              <div ref={messagesEndRef} /> {/* For auto-scrolling */}
+              <div ref={messagesEndRef} /> 
             </div>
             <div className="input-container">
               <input
                 className="chat-input"
                 type="text"
-                placeholder="Type your message to Keisha..."
+                placeholder={isAiThinking ? "Keisha is thinking..." : (loadingAuthState || !userProfile ? "Authenticating..." : "Type your message to Keisha...")}
                 value={inputValue} 
                 onChange={(e) => setInputValue(e.target.value)} 
                 onKeyPress={(e) => {
@@ -601,7 +718,8 @@ function App() {
                     handleSendMessage(); 
                   }
                 }}
-                disabled={!session || isAiThinking} // Disable if not logged in or AI is thinking (for later)
+                disabled={isAiThinking || loadingAuthState || !userProfile} // Disable if AI is thinking, auth loading, or no profile
+                ref={inputRef}
               />
               <button 
                 className="send-btn" 
@@ -610,7 +728,7 @@ function App() {
                     handleSendMessage(); 
                   }
                 }}
-                disabled={!session || !inputValue.trim() || isAiThinking}
+                disabled={isAiThinking || !inputValue.trim() || loadingAuthState || !userProfile} // Also disable if auth loading or no profile
               >
                 Send
               </button>
@@ -637,6 +755,10 @@ function App() {
             {userProfile && userProfile.subscription_tier === 'Free' && (
               <p>Messages today: {userProfile.message_count_today} / 10</p>
             )}
+            <div className="support-info">
+              <p className="beta-notice">Keisha AI is currently in Beta. We're continuously improving the experience based on your feedback.</p>
+              <p>Have you discovered a bug or need assistance? <a href="mailto:abitofadviceconsulting@gmail.com" className="support-link">Contact our support team</a>.</p>
+            </div>
           </div>
 
           <div className="settings-section subscription-section">
@@ -715,8 +837,8 @@ function App() {
       )}
 
       {currentView === 'upgradeCheckout' && selectedUpgradeTier && (
-        <div className="upgrade-checkout-page-full-view settings-page-full-view"> {/* Re-use settings styles for now */}
-          <div className="settings-header"> {/* Re-use header style */}
+        <div className="upgrade-checkout-page-full-view settings-page-full-view"> 
+          <div className="settings-header"> 
             <h2>Complete Your Upgrade to <span style={{textTransform: 'capitalize'}}>{selectedUpgradeTier}</span></h2>
             <button 
               onClick={() => { setCurrentView('settings'); setSelectedUpgradeTier(null); }} 
@@ -767,7 +889,7 @@ function App() {
                 onClick={() => {
                     setCurrentView('settings'); 
                     setSelectedUpgradeTier(null);
-                    setPaymentError(''); // Clear payment error on cancel
+                    setPaymentError(''); 
                 }} 
                 className="tier-button secondary-tier-button"
             >
@@ -779,20 +901,19 @@ function App() {
       )}
 
       {currentView === 'paymentSuccess' && (
-        <div className="payment-result-page settings-page-full-view"> {/* Reuse styling */}
+        <div className="payment-result-page settings-page-full-view"> 
           <div className="settings-header">
             <h2>Payment Successful!</h2>
           </div>
           <div className="settings-section">
             <p>Thank you for your payment. Your upgrade is being processed.</p>
             <p>Your chat history and settings will reflect the new plan shortly.</p>
-            {/* Optional: Display Charge ID */}
             {new URLSearchParams(window.location.search).get('chargeId') && (
               <p>Charge ID: {new URLSearchParams(window.location.search).get('chargeId')}</p>
             )}
             <button 
               onClick={() => {
-                window.history.pushState({}, '', '/'); // Clean URL
+                window.history.pushState({}, '', '/'); 
                 setCurrentView('chat');
               }}
               className="tier-button"
@@ -804,7 +925,7 @@ function App() {
       )}
 
       {currentView === 'paymentCancelled' && (
-        <div className="payment-result-page settings-page-full-view"> {/* Reuse styling */}
+        <div className="payment-result-page settings-page-full-view"> 
           <div className="settings-header">
             <h2>Payment Cancelled</h2>
           </div>
@@ -812,7 +933,7 @@ function App() {
             <p>Your payment process was cancelled. You have not been charged.</p>
             <button 
               onClick={() => {
-                window.history.pushState({}, '', '/'); // Clean URL
+                window.history.pushState({}, '', '/'); 
                 setCurrentView('settings');
               }}
               className="tier-button"
@@ -822,7 +943,7 @@ function App() {
             {selectedUpgradeTier && (
                  <button 
                     onClick={() => {
-                        window.history.pushState({}, '', '/'); // Clean URL
+                        window.history.pushState({}, '', '/'); 
                         setCurrentView('upgradeCheckout'); 
                     }}
                     className="tier-button secondary-tier-button"
@@ -834,6 +955,17 @@ function App() {
         </div>
       )}
 
+      {showPaywallModal && (
+        <div className="paywall-modal">
+          <div className="paywall-modal-content">
+            <h2>Upgrade to Continue</h2>
+            <p>You've reached your daily message limit for the free plan.</p>
+            <p>Consider upgrading to one of our paid plans to continue chatting with Keisha.</p>
+            <button onClick={() => setCurrentView('settings')}>Upgrade Now</button>
+            <button onClick={() => setShowPaywallModal(false)}>Close</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

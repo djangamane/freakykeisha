@@ -783,3 +783,92 @@
     font-size: 0.9em;
     border: 1px solid rgba(76, 175, 80, 0.3);
 }
+
+/* Customer Support Section Styles */
+.support-info {
+    margin-top: 20px;
+    padding: 15px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    border-left: 3px solid #f06292;
+}
+
+.beta-notice {
+    font-weight: 500;
+    margin-bottom: 10px;
+    color: #f8c3d7;
+}
+
+.support-link {
+    color: #f06292;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s ease;
+}
+
+.support-link:hover {
+    color: #ff94c2;
+    text-decoration: underline;
+}
+
+/* Paywall Modal Styles */
+.paywall-modal {
+  position: fixed; /* Stay in place */
+  z-index: 1000; /* Sit on top */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgba(0,0,0,0.6); /* Black w/ opacity for overlay */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.paywall-modal-content {
+  background-color: #3c1a3c; /* Dark purple, similar to settings */
+  color: #f8c3d7; /* Light pink text */
+  margin: auto;
+  padding: 30px;
+  border: 1px solid #888;
+  border-radius: 10px;
+  width: 80%;
+  max-width: 500px;
+  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
+  text-align: center;
+}
+
+.paywall-modal-content h2 {
+  color: #fff; /* White for header */
+  margin-top: 0;
+}
+
+.paywall-modal-content p {
+  margin-bottom: 15px;
+  line-height: 1.5;
+}
+
+.paywall-modal-content button {
+  background-color: #f06292; /* Pink button */
+  color: white;
+  padding: 12px 20px;
+  margin: 10px 5px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1em;
+}
+
+.paywall-modal-content button:hover {
+  background-color: #ec407a; /* Darker pink on hover */
+}
+
+/* Optional: Style for a secondary button like 'Close' */
+.paywall-modal-content button.secondary {
+  background-color: #7852a9; /* Purple */
+}
+
+.paywall-modal-content button.secondary:hover {
+  background-color: #5e35b1; /* Darker Purple */
+}
