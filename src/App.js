@@ -98,6 +98,8 @@ function App() {
   const [paymentError, setPaymentError] = useState(''); 
   const [isInitializingNewSession, setIsInitializingNewSession] = useState(false);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+  // Always show the under construction overlay
+  const [showUnderConstruction] = useState(true);
   const fetchingUserIdRef = useRef(null);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
@@ -634,14 +636,25 @@ function App() {
   // If we reach here, loadingAuthState AND loadingProfile are BOTH false.
   if (!session) {
     return (
-      <div 
-        className="landing-page"
-        style={{ 
-          backgroundImage: `url(${windowWidth <= 768 ? mobileLandingImageUrl : desktopLandingImageUrl})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center'
-        }}
-      > 
+      <>
+        {showUnderConstruction && (
+          <div className="under-construction-overlay">
+            <div className="under-construction-content">
+              <h2>Site Under Construction</h2>
+              <p>We're currently making some improvements to Keisha AI.</p>
+              <p>Thank you for your interest, but we're not accepting new users at this time.</p>
+              <p>Please check back later for updates.</p>
+            </div>
+          </div>
+        )}
+        <div 
+          className="landing-page"
+          style={{ 
+            backgroundImage: `url(${windowWidth <= 768 ? mobileLandingImageUrl : desktopLandingImageUrl})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center'
+          }}
+        > 
         <div className="entry-box">
           <h2>Welcome to Keisha AI</h2>
           <p>Please sign in or sign up to continue.</p>
@@ -672,20 +685,22 @@ function App() {
           </form>
         </div>
       </div>
+      </>
     );
   }
 
   return (
-    <div 
-      className="app-container-authed"
-      style={{ 
-        backgroundImage: `url(${windowWidth <= 768 ? mobileKeishaImageUrl : kb3ImageUrl})`, 
-        backgroundSize: 'cover', 
-        backgroundPosition: windowWidth <= 768 ? 'center' : 'center bottom', 
-        height: '100vh', 
-        overflow: 'hidden' 
-      }}
-    >
+    <>
+      <div 
+        className="app-container-authed"
+        style={{ 
+          backgroundImage: `url(${windowWidth <= 768 ? mobileKeishaImageUrl : kb3ImageUrl})`, 
+          backgroundSize: 'cover', 
+          backgroundPosition: windowWidth <= 768 ? 'center' : 'center bottom', 
+          height: '100vh', 
+          overflow: 'hidden' 
+        }}
+      >
       {currentView === 'chat' && (
         <>
           <div className={panelOpen ? "side-panel" : "side-panel collapsed"}>
@@ -1014,6 +1029,7 @@ function App() {
         </div>
       )}
     </div>
+    </>
   );
 }
 
