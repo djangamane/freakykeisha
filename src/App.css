@@ -1,0 +1,1162 @@
+/* Landing Page Styles */
+.landing-page {
+  height: 100vh;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-size: cover;
+  background-position: center;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+/* The background image is set inline in App.js for desktop */
+.app-container-authed {
+  display: flex;
+  flex-direction: row;
+  height: 100vh;
+  background-color: #282c34; 
+  background-size: cover;
+  background-position: center;
+  padding: 24px; 
+  box-sizing: border-box;
+  gap: 20px; 
+}
+
+.disclaimer-text {
+  font-size: 0.8em;
+  color: #f8c3d7; /* Lighter pink, adjust as needed */
+  margin-top: 10px; /* Space above the form */
+  margin-bottom: 15px; /* Space below the disclaimer */
+  max-width: 90%;
+  line-height: 1.4;
+}
+
+/* Center the disclaimer text specifically within the chat box */
+.chat-box .disclaimer-text {
+  text-align: center;
+  width: 100%; /* Ensure it takes full width to center properly */
+}
+
+.side-panel {
+  width: 250px;
+  min-width: 250px;
+  max-width: 250px;
+  height: calc(100vh - 48px); 
+  background: linear-gradient(to bottom, rgba(255, 0, 255, 0.75), rgba(128, 0, 128, 0.75)); 
+  padding: 20px;
+  box-sizing: border-box;
+  border-radius: 12px 0 0 12px; 
+  box-shadow: 3px 0 10px rgba(0,0,0,0.2);
+  display: flex;
+  flex-direction: column;
+  color: #fff;
+  transition: width 0.3s ease, transform 0.3s ease;
+  z-index: 100; 
+  position: relative; 
+  flex-shrink: 0; 
+  border-right: none;
+  margin: 0 24px 0 0;
+  overflow: hidden;
+}
+
+.side-panel.collapsed {
+  width: 50px;
+  min-width: 50px;
+  padding: 0;
+  margin-right: 24px;
+  opacity: 1;
+}
+
+.panel-toggle {
+  background: none;
+  border: none;
+  font-size: 1.5em;
+  color: #333;
+  cursor: pointer;
+  align-self: flex-start;
+  padding: 0 0 10px 0;
+}
+
+.panel-content {
+  padding: 15px;
+  overflow-y: auto;
+  flex-grow: 1;
+}
+
+.panel-content h3 {
+  font-size: 0.9em;
+  margin-bottom: 10px;
+}
+
+.conversation-list,
+.options-list {
+  list-style: none;
+  padding: 0;
+}
+
+.conversation-list li,
+.options-list li {
+  padding: 8px 0;
+  cursor: pointer;
+  font-size: 0.8em;
+}
+
+.conversation-list li:hover,
+.options-list li:hover {
+  background-color: #f0f0f0;
+}
+
+.chat-box {
+  flex-grow: 0; 
+  flex-shrink: 0;
+  width: clamp(450px, 50vw, 800px); 
+  height: calc(100vh - 48px); 
+  background: linear-gradient(to bottom, rgba(255, 0, 255, 0.75), rgba(128, 0, 128, 0.75)); 
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0px 0 24px 0 rgba(40,44,52,0.15);
+  border-left: none;
+  border-radius: 18px;
+  margin: 0; 
+  margin-left: auto; 
+  overflow: hidden;
+}
+
+.chat-content {
+  flex-grow: 1;
+  padding: 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.message {
+  padding: 10px 15px;
+  margin-bottom: 10px;
+  border-radius: 18px;
+  max-width: 70%;
+  font-size: 0.8em;
+  line-height: 1.4;
+  word-wrap: break-word;
+}
+
+.message p {
+  margin: 0;
+}
+
+.message.user {
+  background-color: #e1f5fe;
+  color: #333;
+  align-self: flex-end;
+  margin-left: auto;
+}
+
+.message.ai {
+  background-color: #f0f0f0;
+  color: #333;
+  align-self: flex-start;
+  margin-right: auto;
+}
+
+.input-container {
+  display: flex;
+  padding: 10px;
+  border-top: 1px solid #cccccc;
+}
+
+.chat-input {
+  flex-grow: 1;
+  padding: 10px;
+  border: 1px solid #dddddd;
+  border-radius: 4px;
+  margin-right: 10px;
+  font-size: 0.8em;
+}
+
+.send-btn {
+  padding: 10px 15px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.send-btn:hover {
+  background-color: #0056b3;
+}
+
+.landing-page {
+  display: flex;
+  flex-direction: column; 
+  justify-content: flex-end; /* Align to bottom */
+  align-items: flex-end; /* Align to right */
+  height: 100vh;
+  background: #282c34 url('../public/kbf.png') no-repeat top center; 
+  background-size: cover;
+  color: white;
+  padding-right: 10%; /* Keep for spacing from very edge */
+  padding-bottom: 5%; /* Add some bottom padding to landing-page */
+}
+
+.entry-box {
+  background: linear-gradient(to bottom, rgba(255, 0, 255, 0.90), rgba(128, 0, 128, 0.90));
+  color: #fff;
+  padding: 48px 36px 40px 36px;
+  border-radius: 18px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+  width: 410px;
+  backdrop-filter: blur(7px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 18px;
+}
+
+.entry-box h2 {
+  margin-top: 0;
+  margin-bottom: 8px;
+  font-size: 2em;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.entry-box p {
+  margin-bottom: 18px;
+  font-size: 1.08em;
+  font-weight: 400;
+  color: #ffe6f0;
+}
+
+.dress-input {
+  margin-bottom: 16px;
+  padding: 13px 14px;
+  border-radius: 7px;
+  border: none;
+  width: 100%;
+  font-size: 1.1em;
+  color: #a02c4d;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+
+.consent-notice {
+  font-size: 1.1em;
+  margin-bottom: 16px;
+  color: #ffd6e0;
+  background: rgba(0,0,0,0.10);
+  padding: 8px 16px;
+  border-radius: 6px;
+  text-align: center;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.consent-notice label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: bold;
+  justify-content: center;
+  width: 100%;
+}
+
+.enter-btn {
+  background-color: #a02c4d;
+  color: #fff;
+  border: none;
+  border-radius: 7px;
+  padding: 13px 32px;
+  font-size: 1.18em;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.18s, box-shadow 0.18s;
+  margin-top: 14px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+}
+
+.enter-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.enter-btn:hover:enabled {
+  background-color: #7d2040;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.13);
+}
+
+.consent-notice {
+  font-size: 1.1em;
+  margin-bottom: 16px;
+  color: #ffd6e0;
+  background: rgba(0,0,0,0.15);
+  padding: 8px 16px;
+  border-radius: 6px;
+  text-align: right;
+}
+
+.enter-btn {
+  background-color: #a02c4d;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 12px 28px;
+  font-size: 1.1em;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s;
+  margin-top: 14px;
+}
+
+.enter-btn:hover {
+  background-color: #7d2040;
+}
+
+.entry-box h2 {
+  margin-top: 0;
+}
+
+.entry-box button {
+  background-color: #61dafb;
+  color: #282c34;
+  border: none;
+  padding: 10px 20px;
+  font-size: 1em;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 20px;
+  transition: background-color 0.3s ease;
+}
+
+.entry-box button:hover {
+  background-color: #21a1f1;
+}
+
+.auth-form-container {
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+  text-align: center;
+  max-width: 400px;
+  width: 90%;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.auth-input {
+  padding: 12px 15px;
+  border-radius: 8px;
+  border: 1px solid #555;
+  background-color: #333;
+  color: #fff;
+  font-size: 1rem;
+}
+
+.auth-input::placeholder {
+  color: #888;
+}
+
+.auth-buttons {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.auth-button {
+  padding: 10px 15px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+  flex-grow: 1;
+}
+
+.sign-in-btn {
+  background-color: #007bff;
+  color: white;
+}
+
+.sign-in-btn:hover {
+  background-color: #0056b3;
+}
+
+.sign-up-btn {
+  background-color: #28a745;
+  color: white;
+}
+
+.sign-up-btn:hover {
+  background-color: #1e7e34;
+}
+
+.auth-error-message {
+  color: #ff4d4d;
+  font-size: 0.9em;
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+
+.auth-message {
+  color: #4dff88;
+  font-size: 0.9em;
+  margin-top: 5px;
+  margin-bottom: 10px;
+}
+
+.settings-page-full-view { 
+  width: 100%; 
+  height: 100%; 
+  background: linear-gradient(to bottom, rgba(255, 0, 255, 0.8), rgba(128, 0, 128, 0.8)); 
+  border-radius: 18px; 
+  padding: 20px 30px; 
+  color: #fff; 
+  display: flex;
+  flex-direction: column;
+  align-items: stretch; 
+  overflow-y: auto; 
+  box-shadow: 0px 0 24px 0 rgba(40,44,52,0.25); 
+}
+
+.settings-page-full-view h2 {
+  margin-bottom: 20px;
+}
+
+.settings-page-full-view p {
+  margin-bottom: 10px;
+}
+
+.sign-out-settings-btn {
+  margin-top: 20px;
+  align-self: flex-start;
+}
+
+.settings-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  padding-bottom: 15px;
+}
+
+.settings-header h2 {
+  margin-bottom: 0;
+}
+
+.close-settings-btn {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 1.8em;
+  cursor: pointer;
+  padding: 0 5px;
+  line-height: 1;
+}
+
+.icon-btn:hover {
+  opacity: 0.8;
+}
+
+.settings-section {
+  margin-bottom: 30px;
+  padding: 20px;
+  background-color: rgba(0, 0, 0, 0.15);
+  border-radius: 12px;
+}
+
+.settings-section h3 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  font-size: 1.4em;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 10px;
+}
+
+.settings-section p {
+  margin-bottom: 10px;
+  font-size: 0.95em;
+  line-height: 1.5;
+}
+
+.current-plan-badge {
+  background-color: #4caf50;
+  color: white;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 0.8em;
+  font-weight: bold;
+}
+
+.subscription-tiers-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+}
+
+.subscription-tier {
+  background-color: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  padding: 20px;
+  flex: 1 1 250px;
+  max-width: 280px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  position: relative;
+}
+
+.subscription-tier:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.subscription-tier h4 {
+  font-size: 1.5em;
+  margin-top: 0;
+  margin-bottom: 10px;
+  color: #f0f0f0;
+}
+
+.tier-price {
+  font-size: 2em;
+  font-weight: bold;
+  margin-bottom: 15px;
+  color: #fff;
+}
+
+.price-period {
+  font-size: 0.5em;
+  font-weight: normal;
+  margin-left: 5px;
+  color: #ccc;
+}
+
+.tier-features {
+  list-style: none;
+  padding: 0;
+  margin-bottom: 20px;
+  font-size: 0.9em;
+  min-height: 60px;
+}
+
+.tier-features li {
+  margin-bottom: 8px;
+  color: #ddd;
+}
+
+.tier-button {
+  background-color: #e91e63;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 6px;
+  font-size: 1em;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  width: 80%;
+  margin-top: auto;
+}
+
+.tier-button:hover {
+  background-color: #c2185b;
+}
+
+.tier-button.disabled-button {
+  background-color: #757575;
+  cursor: not-allowed;
+}
+
+.tier-gold {
+  border-color: #ffd700;
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+  background: linear-gradient(145deg, rgba(70, 50, 20, 0.3), rgba(50, 30, 10, 0.2)), 
+              radial-gradient(circle, rgba(255,215,0,0.15) 0%, rgba(255,215,0,0) 70%);
+}
+
+.tier-gold h4 {
+  color: #ffd700;
+}
+
+.tier-button-gold {
+  background-color: #ffc107;
+  color: #333;
+}
+
+.tier-button-gold:hover {
+  background-color: #ffa000;
+}
+
+.best-value-badge {
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #ff9800;
+  color: white;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.8em;
+  font-weight: bold;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.tier-gold .best-value-badge {
+  background-color: #ffd700;
+  color: #333;
+}
+
+.upcoming-features .coming-soon-feature {
+  font-size: 1.1em;
+  font-weight: bold;
+  color: #81d4fa;
+}
+
+.sign-out-section {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.sign-out-settings-btn {
+  margin-top: 0;
+}
+
+/* Styles for Upgrade/Checkout Page */
+.upgrade-checkout-page-full-view .settings-header h2 {
+  font-size: 1.8em; 
+}
+
+.upgrade-checkout-page-full-view .settings-section {
+  background-color: rgba(0, 0, 0, 0.2); 
+  /* margin-bottom: 25px; Already there */
+}
+
+.upgrade-summary-section p,
+.payment-details-section p,
+.confirmation-section p {
+  font-size: 1em; 
+  line-height: 1.6;
+}
+
+.bitcoin-payment-info {
+  background-color: rgba(0, 0, 0, 0.25); 
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  padding: 20px;
+  margin-top: 15px;
+}
+
+.bitcoin-payment-info h4 {
+  margin-top: 0;
+  color: #ffd700; 
+  font-size: 1.2em;
+}
+
+.bitcoin-payment-info p strong {
+  color: #f0f0f0;
+}
+
+/* Style for Bitcoin address for better copy-paste */
+.bitcoin-payment-info p:nth-of-type(3) { 
+  font-family: 'Courier New', Courier, monospace;
+  word-break: break-all; 
+  background-color: rgba(255,255,255,0.05);
+  padding: 5px;
+  border-radius: 4px;
+}
+
+.copy-btn {
+  background-color: #555;
+  color: #fff;
+  border: none;
+  padding: 3px 8px;
+  font-size: 0.8em;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-left: 10px;
+}
+
+.copy-btn:hover {
+  background-color: #777;
+}
+
+.upgrade-checkout-page-full-view .confirmation-section .tier-button {
+  background-color: #6c757d; 
+  display: block;
+  margin: 20px auto 0 auto; 
+}
+
+.upgrade-checkout-page-full-view .confirmation-section .tier-button:hover {
+  background-color: #5a6268;
+}
+
+/* Landing Page styles remain largely the same */
+.landing-page {
+  height: 100vh;
+  background: url('../public/kbf.png') no-repeat center top fixed; /* CORRECTED PATH - retaining original structure which did not have #282c34 here */
+  background-size: cover;
+  display: flex;
+  justify-content: flex-end; /* Align to bottom */
+  align-items: flex-end; /* Align to right */
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+/* Authentication Form Styling (within Landing Page or other contexts) */
+.entry-box, 
+.auth-form-container { 
+  display: flex;
+  flex-direction: column;
+  gap: 15px; 
+  padding: 25px;
+  background-color: rgba(0, 0, 0, 0.7); 
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5); 
+  min-width: 300px; 
+  max-width: 400px; 
+  position: relative; 
+  transform: translateY(30px); 
+}
+
+.auth-form-container input[type="email"],
+.auth-form-container input[type="password"],
+.auth-form-container input[type="text"] {
+  padding: 12px;
+  border-radius: 6px;
+  border: 1px solid #555; 
+  background-color: #333; 
+  color: #fff; 
+  font-size: 1em;
+}
+
+.auth-form-container input[type="email"]::placeholder,
+.auth-form-container input[type="password"]::placeholder,
+.auth-form-container input[type="text"]::placeholder {
+  color: #888; 
+}
+
+.auth-form-container button[type="submit"] {
+  padding: 12px;
+  border-radius: 6px;
+  border: none;
+  background-color: #f042c1; 
+  color: white;
+  font-size: 1.1em;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.auth-form-container button[type="submit"]:hover {
+  background-color: #d020a1; 
+}
+
+.auth-form-container .form-toggle-link {
+  color: #f042c1; 
+  text-decoration: none;
+  font-size: 0.9em;
+  text-align: center;
+  cursor: pointer;
+}
+
+.auth-form-container .form-toggle-link:hover {
+  text-decoration: underline;
+}
+
+.error-message {
+  color: #ff4d4d; 
+  background-color: rgba(255, 77, 77, 0.1);
+  padding: 10px;
+  border-radius: 4px;
+  text-align: center;
+  font-size: 0.9em;
+  border: 1px solid rgba(255, 77, 77, 0.3);
+}
+
+.success-message {
+    color: #4CAF50; 
+    background-color: rgba(76, 175, 80, 0.1);
+    padding: 10px;
+    border-radius: 4px;
+    text-align: center;
+    font-size: 0.9em;
+    border: 1px solid rgba(76, 175, 80, 0.3);
+}
+
+/* Customer Support Section Styles */
+.support-info {
+    margin-top: 20px;
+    padding: 15px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    border-left: 3px solid #f06292;
+}
+
+.beta-notice {
+    font-weight: 500;
+    margin-bottom: 10px;
+    color: #f8c3d7;
+}
+
+.support-link {
+    color: #f06292;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s ease;
+}
+
+.support-link:hover {
+    color: #ff94c2;
+    text-decoration: underline;
+}
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+    /* Mobile styles for app container */
+    .app-container-authed {
+        /* Background image will be set via inline style in App.js */
+        padding: 10px;
+        flex-direction: column;
+    }
+    /* Landing/Login Page */
+    .landing-page {
+        padding: 15px;
+        /* Background will be set inline in App.js */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    .landing-page .entry-box {
+        width: 85%;
+        max-width: 320px;
+        padding: 20px;
+        margin: 0;
+        transform: none;
+        background-color: rgba(0, 0, 0, 0.75);
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
+    }
+    
+    .auth-input, .auth-form input[type="email"],
+    .auth-form input[type="password"],
+    .auth-form input[type="text"] {
+        font-size: 16px; /* Prevents iOS zoom on focus */
+        padding: 12px;
+        width: 100%;
+        box-sizing: border-box;
+    }
+    
+    .auth-buttons {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .auth-button {
+        width: 100%;
+        margin: 5px 0;
+        padding: 14px;
+        font-size: 16px;
+    }
+    
+    /* Chat Interface */
+    .app-container-authed {
+        flex-direction: column;
+        padding: 10px;
+        gap: 10px;
+    }
+    
+    /* Mobile Side Panel Styling */
+    .side-panel {
+        position: fixed;
+        top: 0;
+        left: -250px; /* Start off-screen */
+        width: 250px;
+        height: 100vh;
+        background: linear-gradient(to bottom, rgba(255, 0, 255, 0.85), rgba(128, 0, 128, 0.85));
+        z-index: 1000;
+        transition: left 0.3s ease;
+        overflow-y: auto;
+        border-radius: 0 12px 12px 0;
+        box-shadow: 3px 0 10px rgba(0,0,0,0.3);
+    }
+    
+    .side-panel:not(.collapsed) {
+        left: 0; /* Slide in */
+    }
+    
+    .side-panel.collapsed {
+        left: -250px; /* Hide off-screen */
+    }
+    
+    .panel-toggle {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        z-index: 10;
+        font-size: 20px;
+        background-color: transparent;
+        color: white;
+        border: none;
+        cursor: pointer;
+    }
+    
+    .mobile-menu-button {
+        position: fixed;
+        top: 15px;
+        left: 15px;
+        width: 45px;
+        height: 45px;
+        background-color: rgba(240, 98, 146, 0.9);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 24px;
+        font-weight: bold;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+        cursor: pointer;
+        border: 2px solid white;
+        outline: none;
+        transition: all 0.2s ease;
+    }
+    
+    .mobile-menu-button:hover {
+        background-color: rgba(240, 98, 146, 1);
+        transform: scale(1.05);
+    }
+    
+    .chat-box {
+        width: 100%;
+        height: calc(100vh - 100px);
+        margin-left: 0;
+        border-radius: 12px;
+        position: relative;
+        z-index: 1; /* Lower than the side panel */
+    }
+    
+    .chat-content {
+        height: calc(100% - 90px);
+    }
+    
+    .message {
+        max-width: 85%;
+        padding: 10px;
+        margin-bottom: 8px;
+    }
+    
+    .input-container {
+        padding: 10px;
+    }
+    
+    .chat-input {
+        font-size: 16px;
+        padding: 12px;
+    }
+    
+    .send-btn {
+        padding: 12px 15px;
+        font-size: 16px;
+    }
+    
+    /* Settings Page */
+    .settings-page-full-view {
+        padding: 15px;
+        width: 100%;
+        box-sizing: border-box;
+    }
+    
+    .subscription-tiers-container {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .subscription-tier {
+        width: 100%;
+        margin: 0;
+    }
+}
+
+/* Paywall Modal Styles */
+.paywall-modal {
+  position: fixed; /* Stay in place */
+  z-index: 1000; /* Sit on top */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgba(0,0,0,0.6); /* Black w/ opacity for overlay */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.paywall-modal-content {
+  background-color: #3c1a3c; /* Dark purple, similar to settings */
+  color: #f8c3d7; /* Light pink text */
+  margin: auto;
+  padding: 30px;
+  border: 1px solid #888;
+  border-radius: 10px;
+  width: 80%;
+  max-width: 500px;
+  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
+  text-align: center;
+}
+
+.paywall-modal-content h2 {
+  color: #fff; /* White for header */
+  margin-top: 0;
+}
+
+.paywall-modal-content p {
+  margin-bottom: 15px;
+  line-height: 1.5;
+}
+
+.paywall-modal-content button {
+  background-color: #f06292; /* Pink button */
+  color: white;
+  padding: 12px 20px;
+  margin: 10px 5px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1em;
+}
+
+.paywall-modal-content button:hover {
+  background-color: #ec407a; /* Darker pink on hover */
+}
+
+/* Under Construction Overlay */
+.under-construction-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.8);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  text-align: center;
+  padding: 20px;
+}
+
+.under-construction-content {
+  background-color: rgba(128, 0, 128, 0.8);
+  padding: 30px;
+  border-radius: 10px;
+  max-width: 500px;
+  width: 90%;
+  box-shadow: 0 0 20px rgba(255, 105, 180, 0.6);
+  border: 2px solid #ff69b4;
+}
+
+.under-construction-overlay h2 {
+  font-size: 2em;
+  margin-bottom: 15px;
+  color: #ff69b4;
+}
+
+.under-construction-overlay p {
+  font-size: 1.2em;
+  margin-bottom: 15px;
+  line-height: 1.5;
+}
+
+/* Optional: Style for a secondary button like 'Close' */
+.paywall-modal-content button.secondary {
+  background-color: #7852a9; /* Purple */
+}
+
+.paywall-modal-content button.secondary:hover {
+  background-color: #5e35b1; /* Darker Purple */
+}
+
+/* Cash App Payment Styles */
+.cash-app-payment {
+  margin-top: 20px;
+  padding: 15px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  border-left: 3px solid #00c244; /* Cash App green */
+}
+
+.cash-app-payment h4 {
+  color: #00c244;
+  margin-top: 0;
+  margin-bottom: 15px;
+  font-size: 1.2em;
+}
+
+.cash-app-container {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+  align-items: center;
+}
+
+.cash-app-qr {
+  width: 150px;
+  height: 150px;
+  background-color: white;
+  padding: 10px;
+  border-radius: 8px;
+}
+
+.cash-app-instructions {
+  flex: 1;
+}
+
+.cash-app-instructions p {
+  margin: 8px 0;
+}
+
+.cash-app-instructions ul {
+  margin: 8px 0;
+  padding-left: 20px;
+}
+
+.cash-app-instructions li {
+  margin: 5px 0;
+}
+
+.cash-app-id {
+  margin-top: 15px;
+  text-align: center;
+  font-size: 1.1em;
+}
+
+/* Mobile styles for Cash App payment */
+@media (max-width: 768px) {
+  .cash-app-container {
+    flex-direction: column;
+  }
+  
+  .cash-app-qr {
+    margin: 0 auto 15px;
+  }
+}

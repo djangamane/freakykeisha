@@ -1,0 +1,365 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Orbitron:wght@400;700&display=swap');
+
+:root {
+  --primary-color: #ff00ff;
+  /* Neon Pink */
+  --secondary-color: #800080;
+  /* Purple */
+  --accent-color: #00ffff;
+  /* Cyan */
+  --background-color: #0a0a0a;
+  --text-color: #ffffff;
+  --matrix-green: #00ff00;
+  /* Bright Green for Matrix effect */
+}
+
+body {
+  margin: 0;
+  font-family: 'Roboto', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  /* Prevent horizontal scrollbar from matrix effect */
+}
+
+.landing-container {
+  background-color: var(--background-color);
+  color: var(--text-color);
+  font-family: 'Roboto', sans-serif;
+  position: relative;
+  overflow: hidden;
+  /* Ensure matrix doesn't overflow */
+}
+
+/* Matrix Background Effect */
+.landing-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image:
+    linear-gradient(to right, transparent 1px, rgba(0, 255, 0, 0.3) 1px, rgba(0, 255, 0, 0.3) 2px, transparent 2px),
+    linear-gradient(to bottom, transparent 1px, rgba(0, 255, 0, 0.3) 1px, rgba(0, 255, 0, 0.3) 2px, transparent 2px);
+  background-size: 30px 30px;
+  /* Smaller grid cells for more visibility */
+  animation: matrix-scroll 20s linear infinite;
+  opacity: 0.4;
+  /* Much more visible */
+  z-index: 0;
+  /* Above background but below content */
+  pointer-events: none;
+  /* Don't interfere with clicks */
+}
+
+@keyframes matrix-scroll {
+  from {
+    background-position: 0 0;
+  }
+
+  to {
+    background-position: 100% 100%;
+  }
+}
+
+.hero-section {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  /* Removed background overlay to allow matrix grid to show through */
+  position: relative;
+  /* Ensure content is above matrix */
+  z-index: 1;
+}
+
+.hero-content h1 {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 4rem;
+  color: var(--primary-color);
+  text-shadow: 0 0 10px var(--primary-color), 0 0 20px var(--primary-color);
+  margin-bottom: 1rem;
+}
+
+.hero-content p {
+  font-size: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.cta-button {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.2rem;
+  color: var(--text-color);
+  background-color: transparent;
+  border: 2px solid var(--accent-color);
+  padding: 1rem 2rem;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.cta-button:hover {
+  background-color: var(--accent-color);
+  color: var(--background-color);
+  box-shadow: 0 0 15px var(--accent-color);
+}
+
+.problem-section,
+.solution-section,
+.creator-section {
+  padding: 4rem 2rem;
+  text-align: center;
+  position: relative;
+  /* Ensure content is above matrix */
+  z-index: 1;
+}
+
+.problem-section h2,
+.solution-section h2,
+.creator-section h2 {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 2.5rem;
+  color: var(--secondary-color);
+  margin-bottom: 1.5rem;
+}
+
+.problem-section p,
+.solution-section p,
+.creator-section p {
+  font-size: 1.2rem;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.waitlist-container {
+  padding: 4rem 2rem;
+  text-align: center;
+  background-color: #1a1a1a;
+  position: relative;
+  /* Ensure content is above matrix */
+  z-index: 1;
+}
+
+.waitlist-container h2 {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 2.5rem;
+  color: var(--primary-color);
+  text-shadow: 0 0 5px var(--primary-color);
+  margin-bottom: 1.5rem;
+}
+
+.waitlist-form {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  /* Allow wrapping on smaller screens */
+  gap: 1rem;
+  /* Space between input and button */
+}
+
+.waitlist-form input {
+  font-size: 1.2rem;
+  padding: 0.8rem;
+  border: 2px solid var(--secondary-color);
+  background-color: var(--background-color);
+  color: var(--text-color);
+  width: 300px;
+  max-width: 80%;
+  /* Responsive input width */
+}
+
+.waitlist-form button {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.2rem;
+  color: var(--background-color);
+  background-color: var(--accent-color);
+  border: none;
+  padding: 0.9rem 2rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.waitlist-form button:hover {
+  box-shadow: 0 0 15px var(--accent-color);
+}
+
+.error-message {
+  color: var(--primary-color);
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.form-message {
+  margin-top: 1rem;
+  font-size: 1.1rem;
+  font-weight: bold;
+}
+
+.success-message {
+  color: var(--accent-color);
+}
+
+/* Keisha Image Showcase Styling */
+.keisha-showcase {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 3rem;
+  background-color: rgba(0, 0, 0, 0.5);
+  padding: 2rem;
+  border-radius: 10px;
+  box-shadow: 0 0 20px rgba(255, 0, 255, 0.3);
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.keisha-image {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+  transition: transform 0.3s ease;
+}
+
+.keisha-image:hover {
+  transform: scale(1.02);
+}
+
+/* Organization Showcase Styling */
+.organization-showcase {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 2.5rem;
+  background-color: rgba(0, 0, 0, 0.5);
+  padding: 2rem;
+  border-radius: 10px;
+  box-shadow: 0 0 20px rgba(255, 0, 255, 0.3);
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.organization-image {
+  max-width: 180px;
+  height: auto;
+  border-radius: 50%;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 0 15px rgba(255, 0, 255, 0.5);
+  transition: transform 0.3s ease;
+  border: 2px solid var(--primary-color);
+}
+
+.organization-image:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 20px rgba(255, 0, 255, 0.8);
+}
+
+.organization-link {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.3rem;
+  color: var(--accent-color);
+  text-decoration: none;
+  text-align: center;
+  transition: all 0.3s ease;
+  padding: 0.5rem 1.5rem;
+  border: 1px solid var(--accent-color);
+  border-radius: 5px;
+}
+
+.organization-link:hover {
+  color: var(--primary-color);
+  text-shadow: 0 0 10px var(--primary-color);
+  border-color: var(--primary-color);
+  background-color: rgba(255, 0, 255, 0.1);
+}
+
+/* Research Showcase Styling */
+.research-showcase {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 3rem;
+  background-color: rgba(0, 0, 0, 0.5);
+  padding: 2rem;
+  border-radius: 10px;
+  box-shadow: 0 0 20px rgba(255, 0, 255, 0.3);
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.research-image {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+  transition: transform 0.3s ease;
+}
+
+.research-image:hover {
+  transform: scale(1.02);
+}
+
+.research-link {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.5rem;
+  color: var(--accent-color);
+  text-decoration: none;
+  text-align: center;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.research-link:hover {
+  color: var(--primary-color);
+  text-shadow: 0 0 10px var(--primary-color);
+}
+
+.research-details {
+  font-family: 'Roboto', sans-serif;
+  font-size: 0.9rem;
+  color: var(--text-color);
+  margin-top: 0.5rem;
+  opacity: 0.8;
+  text-align: center;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .hero-content h1 {
+    font-size: 2.5rem;
+  }
+
+  .hero-content p {
+    font-size: 1.2rem;
+  }
+
+  .problem-section h2,
+  .solution-section h2,
+  .creator-section h2,
+  .waitlist-container h2 {
+    font-size: 2rem;
+  }
+
+  .problem-section p,
+  .solution-section p,
+  .creator-section p {
+    font-size: 1rem;
+  }
+
+  .waitlist-form {
+    flex-direction: column;
+  }
+
+  .waitlist-form input {
+    width: 90%;
+    margin-right: 0;
+  }
+}
