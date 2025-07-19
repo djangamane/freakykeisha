@@ -1531,8 +1531,9 @@ ding States and Micro-interactions */
   .loading-skeleton {
     animation: none;
   }
-}/
-* Error States and Feedback */
+}
+
+/* Error States and Feedback */
 .error-message {
   background-color: rgba(248, 81, 73, 0.1);
   border: 1px solid var(--color-error);
@@ -2036,8 +2037,9 @@ h1, h2, h3, h4, h5, h6 {
 
 p, li, span {
   line-height: 1.6;
-}/
-* Kimi-Style Interface */
+}
+
+/* Kimi-Style Interface */
 .app-container-authed {
   background-color: var(--color-background);
   display: flex;
