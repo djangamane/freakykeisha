@@ -52,13 +52,13 @@ function testSupabaseProfileQuery(userId) {
     console.error("[testSupabaseProfileQuery] Supabase query did not return a valid promise object.");
     // Attempt to log what it did return, safely
     try {
-        console.log("[testSupabaseProfileQuery] Supabase returned:", JSON.stringify(queryPromise));
+      console.log("[testSupabaseProfileQuery] Supabase returned:", JSON.stringify(queryPromise));
     } catch (e) {
-        console.log("[testSupabaseProfileQuery] Supabase returned (could not stringify):", queryPromise);
+      console.log("[testSupabaseProfileQuery] Supabase returned (could not stringify):", queryPromise);
     }
     return Promise.reject(new Error("Supabase query did not return a valid promise."));
   }
-  
+
   console.log(`[testSupabaseProfileQuery] Supabase promise created. Attaching .then(), .catch(), and .finally().`);
 
   queryPromise
@@ -85,18 +85,18 @@ function App() {
   const [inputValue, setInputValue] = useState("");
   const [messages, setMessages] = useState([]);
   const [currentSessionId, setCurrentSessionId] = useState(null);
-  const [session, setSession] = useState(null); 
-  const [userProfile, setUserProfile] = useState(null); 
+  const [session, setSession] = useState(null);
+  const [userProfile, setUserProfile] = useState(null);
   const [showPaywallModal, setShowPaywallModal] = useState(false); // New state for paywall
-  const [isAiThinking, setIsAiThinking] = useState(false); 
-  const [loadingAuthState, setLoadingAuthState] = useState(true); 
-  const [email, setEmail] = useState(''); 
-  const [password, setPassword] = useState(''); 
-  const [authError, setAuthError] = useState(''); 
-  const [authMessage, setAuthMessage] = useState(''); 
-  const [currentView, setCurrentView] = useState('chat'); 
-  const [selectedUpgradeTier, setSelectedUpgradeTier] = useState(null); 
-  const [paymentError, setPaymentError] = useState(''); 
+  const [isAiThinking, setIsAiThinking] = useState(false);
+  const [loadingAuthState, setLoadingAuthState] = useState(true);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [authError, setAuthError] = useState('');
+  const [authMessage, setAuthMessage] = useState('');
+  const [currentView, setCurrentView] = useState('chat');
+  const [selectedUpgradeTier, setSelectedUpgradeTier] = useState(null);
+  const [paymentError, setPaymentError] = useState('');
   const [isInitializingNewSession, setIsInitializingNewSession] = useState(false);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   // Always show the under construction overlay
@@ -107,13 +107,13 @@ function App() {
   const isFetchingProfile = useRef(false);
   const [loadingProfile, setLoadingProfile] = useState(false); // Initialize to false, true when fetching
   const [profileError, setProfileError] = useState(null);
-  
+
   // Handle window resize to detect mobile vs desktop
   useEffect(() => {
     const handleResize = () => {
       setWindowWidth(window.innerWidth);
     };
-    
+
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
@@ -142,7 +142,7 @@ function App() {
     }
   }, [currentView, inputRef]);
 
-  const fetchUserProfile = useCallback(async (userId, userEmailIfAvailable) => { 
+  const fetchUserProfile = useCallback(async (userId, userEmailIfAvailable) => {
     console.log(`[fetchUserProfile] Called for userId: ${userId}`);
     if (fetchingUserIdRef.current === userId) {
       console.log(`[fetchUserProfile] Already fetching for userId: ${userId}, skipping.`);
@@ -150,7 +150,7 @@ function App() {
     }
     if (!userId) {
       console.log('[fetchUserProfile] No userId provided, setting default guest profile.');
-      setUserProfile({ 
+      setUserProfile({
         subscription_tier: 'Free',
         message_count_today: 0,
         last_message_reset_at: null,
@@ -169,11 +169,11 @@ function App() {
     try {
       console.log(`[fetchUserProfile] Checking Supabase client:`, supabase);
       console.log(`[fetchUserProfile] Checking supabase.from type:`, typeof supabase.from);
-      console.log(`[fetchUserProfile] TRY block entered for userId: ${userId}. Calling testSupabaseProfileQuery.`); 
-      
+      console.log(`[fetchUserProfile] TRY block entered for userId: ${userId}. Calling testSupabaseProfileQuery.`);
+
       // Call the isolated test function
       const profileQueryResponse = await testSupabaseProfileQuery(userId);
-      
+
       console.log(`[fetchUserProfile] Response from awaited testSupabaseProfileQuery:`, profileQueryResponse);
 
       // The structure of profileQueryResponse should be { data, error, status, ... }
@@ -182,12 +182,12 @@ function App() {
       if (profileError) {
         console.error('[fetchUserProfile] Error fetching profile:', profileError);
         const defaultErrorProfile = {
-          subscription_tier: 'Free', 
-          message_count_today: 0, 
-          last_message_reset_at: null, 
+          subscription_tier: 'Free',
+          message_count_today: 0,
+          last_message_reset_at: null,
           subscription_expires_at: null,
-          username: userEmailIfAvailable || 'User', 
-          id: userId 
+          username: userEmailIfAvailable || 'User',
+          id: userId
         };
         console.log('[fetchUserProfile] Setting default profile due to error:', defaultErrorProfile);
         setUserProfile(defaultErrorProfile);
@@ -200,25 +200,25 @@ function App() {
         // Supabase v2 often returns data: null and error: null with a status that indicates not found (e.g., 406 or PostgrestError with code PGRST116).
         // Supabase v3 might behave differently. Let's check the whole response.
         const newDefaultProfile = {
-          subscription_tier: 'Free', 
-          message_count_today: 0, 
-          last_message_reset_at: null, 
+          subscription_tier: 'Free',
+          message_count_today: 0,
+          last_message_reset_at: null,
           subscription_expires_at: null,
-          username: userEmailIfAvailable || 'User', 
-          id: userId 
+          username: userEmailIfAvailable || 'User',
+          id: userId
         };
         console.log('[fetchUserProfile] No profile data in array (new user?), setting default profile:', newDefaultProfile);
         setUserProfile(newDefaultProfile);
       }
     } catch (e) {
-      console.error(`[fetchUserProfile] CATCH block entered for userId: ${userId}. Exception during profile fetch:`, e); 
+      console.error(`[fetchUserProfile] CATCH block entered for userId: ${userId}. Exception during profile fetch:`, e);
       const exceptionProfile = {
-        subscription_tier: 'Free', 
-        message_count_today: 0, 
-        last_message_reset_at: null, 
+        subscription_tier: 'Free',
+        message_count_today: 0,
+        last_message_reset_at: null,
         subscription_expires_at: null,
-        username: userEmailIfAvailable || 'User', 
-        id: userId 
+        username: userEmailIfAvailable || 'User',
+        id: userId
       };
       console.log('[fetchUserProfile] Setting default profile due to exception:', exceptionProfile);
       setUserProfile(exceptionProfile);
@@ -232,45 +232,45 @@ function App() {
   // Function to fetch messages for a given session ID
   const fetchAndSetMessagesForSession = useCallback(async (sessionId) => {
     if (!sessionId) {
-        setMessages([]);
-        return;
+      setMessages([]);
+      return;
     }
     try {
-        const { data: sessionMessagesData, error } = await supabase
-            .from('messages')
-            .select('id, user_prompt, ai_response, created_at, session_id') // Ensure `id` is selected for stable keys
-            .eq('session_id', sessionId)
-            .order('created_at', { ascending: true });
+      const { data: sessionMessagesData, error } = await supabase
+        .from('messages')
+        .select('id, user_prompt, ai_response, created_at, session_id') // Ensure `id` is selected for stable keys
+        .eq('session_id', sessionId)
+        .order('created_at', { ascending: true });
 
-        if (error) {
-            console.error('Error fetching messages for session:', error);
-            setMessages([]); 
-            return;
-        }
-
-        const loadedDisplayMessages = [];
-        sessionMessagesData.forEach(dbRow => {
-            if (dbRow.user_prompt) {
-                loadedDisplayMessages.push({ 
-                    id: dbRow.id + '_user', // Stable ID based on DB row ID + suffix
-                    text: dbRow.user_prompt, 
-                    sender: 'user',
-                    timestamp: dbRow.created_at 
-                });
-            }
-            if (dbRow.ai_response) {
-                loadedDisplayMessages.push({ 
-                    id: dbRow.id + '_ai', // Stable ID based on DB row ID + suffix
-                    text: dbRow.ai_response, 
-                    sender: 'ai',
-                    timestamp: dbRow.created_at 
-                });
-            }
-        });
-        setMessages(loadedDisplayMessages);
-    } catch (e) {
-        console.error("Exception fetching messages:", e);
+      if (error) {
+        console.error('Error fetching messages for session:', error);
         setMessages([]);
+        return;
+      }
+
+      const loadedDisplayMessages = [];
+      sessionMessagesData.forEach(dbRow => {
+        if (dbRow.user_prompt) {
+          loadedDisplayMessages.push({
+            id: dbRow.id + '_user', // Stable ID based on DB row ID + suffix
+            text: dbRow.user_prompt,
+            sender: 'user',
+            timestamp: dbRow.created_at
+          });
+        }
+        if (dbRow.ai_response) {
+          loadedDisplayMessages.push({
+            id: dbRow.id + '_ai', // Stable ID based on DB row ID + suffix
+            text: dbRow.ai_response,
+            sender: 'ai',
+            timestamp: dbRow.created_at
+          });
+        }
+      });
+      setMessages(loadedDisplayMessages);
+    } catch (e) {
+      console.error("Exception fetching messages:", e);
+      setMessages([]);
     } finally {
     }
   }, []); // Dependencies: supabase client instance if it were outside, but it's global here.
@@ -279,14 +279,14 @@ function App() {
     console.log('[Auth Effect] Started. loadingAuthState = true');
     setLoadingAuthState(true);
     const { data: authListener } = supabase.auth.onAuthStateChange(
-      async (_event, sessionState) => { 
+      async (_event, sessionState) => {
         console.log('[Auth Listener] Event:', _event, 'Session:', sessionState);
-        setSession(sessionState); 
+        setSession(sessionState);
         if (sessionState?.user) {
           console.log('[Auth Listener] User found, profile fetch will be handled by dedicated effect.');
         } else {
           console.log('[Auth Listener] No user session, clearing profile.');
-          setUserProfile(null); 
+          setUserProfile(null);
         }
         console.log('[Auth Listener] Setting loadingAuthState = false');
         setLoadingAuthState(false);
@@ -297,7 +297,7 @@ function App() {
       console.log('[Auth Effect IIFE] Getting initial session...');
       const { data: { session: initialSession } } = await supabase.auth.getSession();
       console.log('[Auth Effect IIFE] Initial session:', initialSession);
-      setSession(initialSession); 
+      setSession(initialSession);
       if (initialSession?.user) {
         console.log('[Auth Effect IIFE] Initial user found, profile fetch will be handled by dedicated effect.');
       }
@@ -307,7 +307,7 @@ function App() {
 
     return () => {
       console.log('[Auth Effect] Cleanup. Unsubscribing auth listener.');
-      authListener?.data?.subscription?.unsubscribe(); 
+      authListener?.data?.subscription?.unsubscribe();
     };
   }, []); // Changed dependency from [fetchUserProfile] to []
 
@@ -327,9 +327,9 @@ function App() {
   useEffect(() => {
     if (currentSessionId && session?.user?.id && !isInitializingNewSession) { // Check the flag
       fetchAndSetMessagesForSession(currentSessionId);
-    } else if (!currentSessionId) { 
+    } else if (!currentSessionId) {
       // This case handles 'New Chat' button press or initial load without a session
-      setMessages([]); 
+      setMessages([]);
     }
     // fetchAndSetMessagesForSession is stable due to useCallback with empty deps.
     // isAiThinking is a boolean.
@@ -343,10 +343,10 @@ function App() {
 
     // User login check
     if (!session?.user?.id) {
-        console.error("User not logged in, cannot send message.");
-        setMessages((prevMessages) => [...prevMessages, {id: uuidv4(), text: "You must be logged in to chat.", sender: 'system', error: true}]);
-        setIsAiThinking(false);            
-        return;
+      console.error("User not logged in, cannot send message.");
+      setMessages((prevMessages) => [...prevMessages, { id: uuidv4(), text: "You must be logged in to chat.", sender: 'system', error: true }]);
+      setIsAiThinking(false);
+      return;
     }
 
     // User Profile Check - This should come BEFORE setting AI thinking or adding user message to UI for sending
@@ -387,7 +387,7 @@ function App() {
     }
 
     if (userProfile.message_count_today >= (userProfile.subscription_tier === 'premium' ? 1000 : 10) && userProfile.subscription_tier !== 'unlimited') {
-      setMessages((prevMessages) => [...prevMessages, {id: uuidv4(), text: "You've reached your daily message limit for your current plan.", sender: 'system', error: true}]);
+      setMessages((prevMessages) => [...prevMessages, { id: uuidv4(), text: "You've reached your daily message limit for your current plan.", sender: 'system', error: true }]);
       setShowPaywallModal(true);
       setIsAiThinking(false); // Stop thinking indicator
       return;
@@ -409,23 +409,28 @@ function App() {
 
     let activeSessionId = currentSessionId;
     if (!activeSessionId) {
-        activeSessionId = uuidv4();
-        setIsInitializingNewSession(true); // Set flag for new session initialization
-        setCurrentSessionId(activeSessionId); 
+      activeSessionId = uuidv4();
+      setIsInitializingNewSession(true); // Set flag for new session initialization
+      setCurrentSessionId(activeSessionId);
     }
 
     const requestBody = {
       message: userMessageContent,
-      model: "goekdenizguelmez/JOSIEFIED-Qwen3", 
-      sessionId: activeSessionId, 
-      userId: session.user.id, 
+      model: "goekdenizguelmez/JOSIEFIED-Qwen3",
+      sessionId: activeSessionId,
+      userId: session.user.id,
+      encrypted: true, // Flag for encryption
     };
 
+    // Use environment variable for API endpoint
+    const API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT || "http://localhost:3001/api/chat";
+
     try {
-      const response = await fetch("http://localhost:3001/api/chat", {
+      const response = await fetch(API_ENDPOINT, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${process.env.REACT_APP_HF_TOKEN || ''}`, // For Hugging Face if needed
         },
         body: JSON.stringify(requestBody),
       });
@@ -439,13 +444,13 @@ function App() {
         }
         console.error("Backend error:", backendErrorMsg);
         // Remove the optimistic message if backend fails before AI response
-        setMessages((prevMessages) => prevMessages.filter(msg => msg.id !== tempUserMessageId)); 
-        setMessages((prevMessages) => [...prevMessages, {id: uuidv4(), text: `Error: ${backendErrorMsg}`, sender: 'ai', error: true}]);
+        setMessages((prevMessages) => prevMessages.filter(msg => msg.id !== tempUserMessageId));
+        setMessages((prevMessages) => [...prevMessages, { id: uuidv4(), text: `Error: ${backendErrorMsg}`, sender: 'ai', error: true }]);
         return;
       }
 
       const data = await response.json(); // data should now contain { userMessage, aiMessage, sessionId }
-      
+
       // Remove the optimistic user message
       setMessages((prevMessages) => prevMessages.filter(msg => msg.id !== tempUserMessageId));
 
@@ -455,7 +460,7 @@ function App() {
         console.log('[handleSendMessage] Raw data.aiMessage received:', JSON.stringify(data.aiMessage, null, 2));
 
         const cleanedAiText = data.aiMessage.text ? data.aiMessage.text.replace(/<think>.*?<\/think>/gs, "").trim() : "AI response text missing";
-        
+
         const confirmedUserMessage = {
           ...data.userMessage,
           id: data.userMessage.id || `user_fallback_${uuidv4()}`, // Fallback ID
@@ -475,28 +480,28 @@ function App() {
 
         setMessages(prevMessages => {
           console.log('[handleSendMessage] prevMessages (before adding confirmed user & AI):', JSON.stringify(prevMessages, null, 2));
-          
+
           // Check for duplicate IDs before adding new messages
           const existingIds = new Set(prevMessages.map(msg => msg.id));
-          
+
           // Ensure unique IDs for new messages
           if (existingIds.has(confirmedUserMessage.id)) {
             confirmedUserMessage.id = `user_${uuidv4()}`;
           }
-          
+
           if (existingIds.has(finalAiMessage.id)) {
             finalAiMessage.id = `ai_${uuidv4()}`;
           }
-          
+
           // Create new messages array with deep copies to avoid reference issues
-          const newMessages = [...prevMessages, {...confirmedUserMessage}, {...finalAiMessage}];
-          
+          const newMessages = [...prevMessages, { ...confirmedUserMessage }, { ...finalAiMessage }];
+
           console.log('[handleSendMessage] newMessages (with confirmed user & AI response):', JSON.stringify(newMessages, null, 2));
-          
+
           if (newMessages.some(msg => !msg || typeof msg.id === 'undefined' || msg.id === null)) {
             console.error('[CRITICAL] Attempting to set messages with a malformed entry (missing/null ID)!', JSON.stringify(newMessages, null, 2));
           }
-          
+
           return newMessages;
         });
       } else {
@@ -509,7 +514,7 @@ function App() {
       console.error("Network or other error sending message:", error);
       // Remove the optimistic message if any other error occurs
       setMessages((prevMessages) => prevMessages.filter(msg => msg.id !== tempUserMessageId));
-      setMessages((prevMessages) => [...prevMessages, {id: uuidv4(), text: `Error: ${error.message}`, sender: 'ai', error: true}]);
+      setMessages((prevMessages) => [...prevMessages, { id: uuidv4(), text: `Error: ${error.message}`, sender: 'ai', error: true }]);
     } finally {
       setIsAiThinking(false);
       if (isInitializingNewSession) {
@@ -528,8 +533,8 @@ function App() {
 
   const handleSignIn = async (e) => {
     e.preventDefault();
-    setAuthError(''); 
-    setAuthMessage(''); 
+    setAuthError('');
+    setAuthMessage('');
     const { error } = await supabase.auth.signInWithPassword({
       email: email,
       password: password,
@@ -548,24 +553,24 @@ function App() {
 
   const handleUpgradePayment = async (tier) => {
     setSelectedUpgradeTier(tier);
-    setPaymentError(''); 
+    setPaymentError('');
 
     if (!session?.user?.id) {
       setPaymentError("User not logged in. Please sign in to upgrade.");
       return;
     }
-    await fetchUserProfile(session.user.id, session.user.email); 
+    await fetchUserProfile(session.user.id, session.user.email);
 
     let amount;
-    let currency = 'USD'; 
-    if (tier === 'Starter') { 
-      amount = 9.00; 
+    let currency = 'USD';
+    if (tier === 'Starter') {
+      amount = 9.00;
       currency = 'USD';
-    } else if (tier === 'Pro') { 
-      amount = 59.00; 
+    } else if (tier === 'Pro') {
+      amount = 59.00;
       currency = 'USD';
-    } else if (tier === 'Gold') { 
-      amount = 99.00; 
+    } else if (tier === 'Gold') {
+      amount = 99.00;
       currency = 'USD';
     } else {
       console.error("Invalid tier selected:", tier);
@@ -574,15 +579,15 @@ function App() {
     }
 
     const paymentRequestBody = {
-      amount: amount, 
-      currency: currency, 
+      amount: amount,
+      currency: currency,
       userEmail: session.user.email,
       userId: session.user.id,
-      tier: tier 
+      tier: tier
     };
 
     try {
-      console.log("Attempting to create Coinbase charge (frontend) with requestBody:", paymentRequestBody); 
+      console.log("Attempting to create Coinbase charge (frontend) with requestBody:", paymentRequestBody);
       const response = await fetch("http://localhost:3001/api/create-coinbase-charge", {
         method: "POST",
         headers: {
@@ -591,15 +596,15 @@ function App() {
         body: JSON.stringify(paymentRequestBody),
       });
 
-      console.log("Frontend: Received response from backend. Status:", response.status, "StatusText:", response.statusText); 
+      console.log("Frontend: Received response from backend. Status:", response.status, "StatusText:", response.statusText);
 
       if (!response.ok) {
         let errorData;
         try {
-            errorData = await response.json(); 
-            console.error("Frontend: Backend responded with an error:", errorData);
+          errorData = await response.json();
+          console.error("Frontend: Backend responded with an error:", errorData);
         } catch (e) {
-            console.error("Frontend: Backend responded with an error, but couldn't parse JSON body:", await response.text());
+          console.error("Frontend: Backend responded with an error, but couldn't parse JSON body:", await response.text());
         }
         throw new Error(errorData?.details || errorData?.error || `HTTP error! status: ${response.status}`);
       }
@@ -609,18 +614,18 @@ function App() {
 
       let data;
       try {
-          data = JSON.parse(responseText); 
+        data = JSON.parse(responseText);
       } catch (e) {
-          console.error("Frontend: Failed to parse JSON from backend response text:", e, "Raw text was:", responseText);
-          throw new Error("Failed to parse response from backend.");
+        console.error("Frontend: Failed to parse JSON from backend response text:", e, "Raw text was:", responseText);
+        throw new Error("Failed to parse response from backend.");
       }
-      
-      console.log("Frontend: Parsed JSON data from backend:", data); 
 
-      if (data && data.hosted_url) { 
-        window.location.href = data.hosted_url; 
+      console.log("Frontend: Parsed JSON data from backend:", data);
+
+      if (data && data.hosted_url) {
+        window.location.href = data.hosted_url;
       } else {
-        console.error("Frontend: hosted_url not found in parsed data. Data was:", data); 
+        console.error("Frontend: hosted_url not found in parsed data. Data was:", data);
         throw new Error("Hosted URL not found in response from backend.");
       }
 
@@ -641,344 +646,441 @@ function App() {
 
   return (
     <>
-      <div 
+      <div
         className="app-container-authed"
-        style={{ 
-          backgroundImage: `url(${windowWidth <= 768 ? mobileKeishaImageUrl : kb3ImageUrl})`, 
-          backgroundSize: 'cover', 
-          backgroundPosition: windowWidth <= 768 ? 'center' : 'center bottom', 
-          height: '100vh', 
-          overflow: 'hidden' 
+        style={{
+          height: '100vh',
+          overflow: 'hidden'
         }}
       >
-      {currentView === 'chat' && (
-        <>
-          <div className={panelOpen ? "side-panel" : "side-panel collapsed"}>
-            <button className="panel-toggle" onClick={() => setPanelOpen((open) => !open)}>
-              {panelOpen ? "←" : "☰"}
-            </button>
-            {panelOpen && (
-              <div className="side-panel-content">
-                <div className="conversation-history-section">
-                  <h3>Conversations</h3>
-                  <button className="new-chat-btn" onClick={handleNewChat}>+ New Chat</button>
+        {currentView === 'chat' && (
+          <>
+            {/* Kimi-Style Interface: Empty State vs Active Chat */}
+            {messages.length === 0 ? (
+              // Empty State - Centered Keisha Branding and Input
+              <div className="chat-empty-state">
+                <h1 className="keisha-branding">KEISHA</h1>
+                <p className="keisha-subtitle">
+                  The Counter-Racist Scholar - Ask me anything about dismantling white supremacy and systemic racism.
+                </p>
+
+                <div className="centered-input-container">
+                  <input
+                    className="centered-chat-input"
+                    type="text"
+                    placeholder={isAiThinking ? "Keisha is thinking..." : (loadingAuthState || !userProfile ? "Authenticating..." : "Ask Anything...")}
+                    value={inputValue}
+                    onChange={(e) => setInputValue(e.target.value)}
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter' && inputValue.trim() !== '') {
+                        handleSendMessage();
+                      }
+                    }}
+                    disabled={isAiThinking || loadingAuthState || !userProfile}
+                    ref={inputRef}
+                  />
+                  <button
+                    className="centered-send-btn"
+                    onClick={() => {
+                      if (inputValue.trim() !== '') {
+                        handleSendMessage();
+                      }
+                    }}
+                    disabled={isAiThinking || !inputValue.trim() || loadingAuthState || !userProfile}
+                  >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
+                    </svg>
+                  </button>
                 </div>
-                <div className="options-section">
-                  <hr />
-                  <h3>Options</h3>
-                  <ul className="options-list">
-                    <li onClick={() => setCurrentView('settings')}>Settings</li>
-                    <li onClick={handleSignOut}>Sign Out</li>
-                  </ul>
+
+                {/* Suggestion Chips */}
+                <div className="suggestion-chips">
+                  <div className="suggestion-chip" onClick={() => setInputValue("What is white supremacy?")}>
+                    What is white supremacy?
+                  </div>
+                  <div className="suggestion-chip" onClick={() => setInputValue("How does systemic racism work?")}>
+                    How does systemic racism work?
+                  </div>
+                  <div className="suggestion-chip" onClick={() => setInputValue("Explain counter-racist strategies")}>
+                    Explain counter-racist strategies
+                  </div>
+                </div>
+
+                {/* Compact sidebar toggle for empty state */}
+                <button
+                  className="mobile-menu-button"
+                  onClick={() => setPanelOpen(true)}
+                  aria-label="Open menu"
+                  style={{ position: 'fixed', top: '20px', left: '20px' }}
+                >
+                  <span style={{ fontSize: '24px', fontWeight: 'bold' }}>☰</span>
+                </button>
+              </div>
+            ) : (
+              // Active Chat State - Full Interface
+              <div className="chat-active-state">
+                <div className={panelOpen ? "side-panel compact" : "side-panel collapsed"}>
+                  <button className="panel-toggle" onClick={() => setPanelOpen((open) => !open)}>
+                    {panelOpen ? "←" : "☰"}
+                  </button>
+                  {panelOpen && (
+                    <div className="side-panel-content">
+                      <div className="conversation-history-section">
+                        <h3>Conversations</h3>
+                        <button className="new-chat-btn" onClick={handleNewChat}>+ New Chat</button>
+                      </div>
+                      <div className="options-section">
+                        <hr />
+                        <h3>Options</h3>
+                        <ul className="options-list">
+                          <li onClick={() => setCurrentView('settings')}>Settings</li>
+                          <li onClick={handleSignOut}>Sign Out</li>
+                        </ul>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Mobile hamburger menu button - only visible when panel is collapsed */}
+                {!panelOpen && (
+                  <button
+                    className="mobile-menu-button"
+                    onClick={() => setPanelOpen(true)}
+                    aria-label="Open menu"
+                  >
+                    <span style={{ fontSize: '24px', fontWeight: 'bold' }}>☰</span>
+                  </button>
+                )}
+
+                <div className="chat-main-area">
+                  <div className="chat-box active">
+                    <div className="chat-content">
+                      {messages.map((msg, index) => {
+                        if (!msg || typeof msg.id === 'undefined' || msg.id === null || typeof msg.text !== 'string' || typeof msg.sender !== 'string') {
+                          console.error('Malformed message object at index:', index, msg);
+                          return (
+                            <div key={`error-${index}-${new Date().getTime()}`} className="message system error">
+                              <p>Error: Corrupted message data. Please try again or contact support if this persists.</p>
+                            </div>
+                          );
+                        }
+                        return (
+                          <div key={msg.id} className={`message ${msg.sender}`}>
+                            <p>{msg.text}</p>
+                          </div>
+                        );
+                      })}
+                      {isAiThinking && (
+                        <div className="ai-thinking">
+                          <span>Keisha is thinking</span>
+                          <div className="typing-indicator">
+                            <div className="typing-dot"></div>
+                            <div className="typing-dot"></div>
+                            <div className="typing-dot"></div>
+                          </div>
+                        </div>
+                      )}
+                      <div ref={messagesEndRef} />
+                    </div>
+                    <div className="input-container">
+                      <input
+                        className="chat-input"
+                        type="text"
+                        placeholder={isAiThinking ? "Keisha is thinking..." : (loadingAuthState || !userProfile ? "Authenticating..." : "Type your message to Keisha...")}
+                        value={inputValue}
+                        onChange={(e) => setInputValue(e.target.value)}
+                        onKeyPress={(e) => {
+                          if (e.key === 'Enter' && inputValue.trim() !== '') {
+                            handleSendMessage();
+                          }
+                        }}
+                        disabled={isAiThinking || loadingAuthState || !userProfile}
+                        ref={inputRef}
+                      />
+                      <button
+                        className="send-btn"
+                        onClick={() => {
+                          if (inputValue.trim() !== '') {
+                            handleSendMessage();
+                          }
+                        }}
+                        disabled={isAiThinking || !inputValue.trim() || loadingAuthState || !userProfile}
+                      >
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
+                        </svg>
+                      </button>
+                    </div>
+                    <p className="disclaimer-text">AI can make mistakes. Consider checking important information.</p>
+                  </div>
                 </div>
               </div>
             )}
-          </div>
-          
-          {/* Mobile hamburger menu button - only visible when panel is collapsed */}
-          {!panelOpen && (
-            <button 
-              className="mobile-menu-button" 
-              onClick={() => setPanelOpen(true)}
-              aria-label="Open menu"
-            >
-              <span style={{ fontSize: '24px', fontWeight: 'bold' }}>☰</span>
-            </button>
-          )}
-          <div className="chat-box">
-            <div className="chat-content">
-              {messages.map((msg, index) => {
-                if (!msg || typeof msg.id === 'undefined' || msg.id === null || typeof msg.text !== 'string' || typeof msg.sender !== 'string') {
-                  console.error('Malformed message object at index:', index, msg);
-                  return (
-                    <div key={`error-${index}-${new Date().getTime()}`} className="message system error">
-                      <p>Error: Corrupted message data. Please try again or contact support if this persists.</p>
-                    </div>
-                  );
-                }
-                return (
-                  <div key={msg.id} className={`message ${msg.sender}`}>
-                    <p>{msg.text}</p>
+
+            {/* Sidebar overlay for empty state */}
+            {messages.length === 0 && panelOpen && (
+              <div className="side-panel" style={{ position: 'fixed', left: 0, top: 0, zIndex: 1000 }}>
+                <button className="panel-toggle" onClick={() => setPanelOpen(false)}>
+                  ×
+                </button>
+                <div className="side-panel-content">
+                  <div className="conversation-history-section">
+                    <h3>Conversations</h3>
+                    <button className="new-chat-btn" onClick={handleNewChat}>+ New Chat</button>
                   </div>
-                );
-              })}
-              {isAiThinking && (
-                <div className="message ai-message thinking-message">
-                  <p className="message-text">Keisha is thinking...</p>
+                  <div className="options-section">
+                    <hr />
+                    <h3>Options</h3>
+                    <ul className="options-list">
+                      <li onClick={() => setCurrentView('settings')}>Settings</li>
+                      <li onClick={handleSignOut}>Sign Out</li>
+                    </ul>
+                  </div>
                 </div>
-              )}
-              <div ref={messagesEndRef} /> 
+              </div>
+            )}
+          </>
+        )}
+
+        {currentView === 'settings' && (
+          <div className="settings-page-full-view">
+            <div className="settings-header">
+              <h2>Settings</h2>
+              <button onClick={() => setCurrentView('chat')} className="close-settings-btn icon-btn">✕</button>
             </div>
-            <div className="input-container">
-              <input
-                className="chat-input"
-                type="text"
-                placeholder={isAiThinking ? "Keisha is thinking..." : (loadingAuthState || !userProfile ? "Authenticating..." : "Type your message to Keisha...")}
-                value={inputValue} 
-                onChange={(e) => setInputValue(e.target.value)} 
-                onKeyPress={(e) => {
-                  if (e.key === 'Enter' && inputValue.trim() !== '') {
-                    handleSendMessage(); 
-                  }
-                }}
-                disabled={isAiThinking || loadingAuthState || !userProfile} // Disable if AI is thinking, auth loading, or no profile
-                ref={inputRef}
-              />
-              <button 
-                className="send-btn" 
-                onClick={() => { 
-                  if (inputValue.trim() !== '') {
-                    handleSendMessage(); 
-                  }
-                }}
-                disabled={isAiThinking || !inputValue.trim() || loadingAuthState || !userProfile} // Also disable if auth loading or no profile
+
+            <div className="settings-section account-info">
+              <h3>Account</h3>
+              <p>Email: {session.user?.email}</p>
+              <p>Current Plan: <span className="current-plan-badge">{userProfile ? userProfile.subscription_tier : 'Loading...'}</span></p>
+              {userProfile && userProfile.subscription_tier !== 'Free' && userProfile.subscription_tier !== 'Gold' && userProfile.subscription_expires_at && (
+                <p>Renews on: {new Date(userProfile.subscription_expires_at).toLocaleDateString()}</p>
+              )}
+              {userProfile && userProfile.subscription_tier === 'Free' && (
+                <p>Messages today: {userProfile.message_count_today} / 10</p>
+              )}
+              <div className="support-info">
+                <p className="beta-notice">Keisha AI is currently in Beta. We're continuously improving the experience based on your feedback.</p>
+                <p>Have you discovered a bug or need assistance? <a href="mailto:abitofadviceconsulting@gmail.com" className="support-link">Contact our support team</a>.</p>
+              </div>
+            </div>
+
+            <div className="settings-section subscription-section">
+              <h3>Subscription Plans</h3>
+              <div className="subscription-tiers-container">
+                <div className="subscription-tier tier-free">
+                  <h4>Free</h4>
+                  <p className="tier-price">$0</p>
+                  <ul className="tier-features">
+                    <li>10 Uncensored Messages/Day</li>
+                  </ul>
+                  <button className="tier-button disabled-button" disabled>Current Plan</button>
+                </div>
+
+                <div className="subscription-tier tier-starter">
+                  <h4>Starter</h4>
+                  <p className="tier-price">$9<span className="price-period">/month</span></p>
+                  <ul className="tier-features">
+                    <li>Unlimited Uncensored Messages</li>
+                  </ul>
+                  <button className="tier-button" onClick={() => { setSelectedUpgradeTier('Starter'); setCurrentView('upgradeCheckout'); }}>Upgrade</button>
+                </div>
+
+                <div className="subscription-tier tier-pro">
+                  <span className="best-value-badge">Annual Value</span>
+                  <h4>Pro</h4>
+                  <p className="tier-price">$59<span className="price-period">/year</span></p>
+                  <ul className="tier-features">
+                    <li>Unlimited Uncensored Messages</li>
+                    <li>Save vs. Monthly!</li>
+                  </ul>
+                  <button className="tier-button" onClick={() => { setSelectedUpgradeTier('Pro'); setCurrentView('upgradeCheckout'); }}>Upgrade</button>
+                </div>
+
+                <div className="subscription-tier tier-gold">
+                  <span className="best-value-badge">✨ Lifetime Deal! ✨</span>
+                  <h4>Gold</h4>
+                  <p className="tier-price">$99<span className="price-period"> one-time</span></p>
+                  <ul className="tier-features">
+                    <li>Unlimited Uncensored Messages</li>
+                    <li>Lifetime Access</li>
+                    <li>Early Access to New Features</li>
+                  </ul>
+                  <button className="tier-button tier-button-gold" onClick={() => { setSelectedUpgradeTier('Gold'); setCurrentView('upgradeCheckout'); }}>Go Gold!</button>
+                </div>
+              </div>
+            </div>
+
+            <div className="settings-section upcoming-features">
+              <h3>Coming Soon!</h3>
+              <p className="coming-soon-feature">📞 Voice Calling with Keisha</p>
+            </div>
+
+            <div className="settings-section payment-options">
+              <h3>Payment Options</h3>
+              <p>We Accept Bitcoin (via Coinbase on the upgrade page).</p>
+              <div className="cash-app-payment">
+                <h4>Pay with Cash App</h4>
+                <div className="cash-app-container">
+                  <img
+                    src={process.env.PUBLIC_URL + '/2cashapp.png'}
+                    alt="Keisha AI Cash App QR Code"
+                    className="cash-app-qr"
+                  />
+                  <div className="cash-app-instructions">
+                    <p><strong>1.</strong> Scan QR code with Cash App</p>
+                    <p><strong>2.</strong> Send exact amount for your plan:</p>
+                    <ul>
+                      <li><strong>Starter:</strong> $15/month</li>
+                      <li><strong>Pro:</strong> $75/year</li>
+                      <li><strong>Gold:</strong> $150 (lifetime)</li>
+                    </ul>
+                    <p><strong>3.</strong> Include your email in payment note</p>
+                    <p><strong>4.</strong> Account will update within 1 hour</p>
+                  </div>
+                </div>
+                <p className="cash-app-id">Cash App ID: <strong>$KeishaAI</strong></p>
+              </div>
+            </div>
+
+            <div className="settings-section sign-out-section">
+              <button onClick={handleSignOut} className="auth-button sign-out-settings-btn">Sign Out</button>
+            </div>
+          </div>
+        )}
+
+        {currentView === 'upgradeCheckout' && selectedUpgradeTier && (
+          <div className="upgrade-checkout-page-full-view settings-page-full-view">
+            <div className="settings-header">
+              <h2>Complete Your Upgrade to <span style={{ textTransform: 'capitalize' }}>{selectedUpgradeTier}</span></h2>
+              <button
+                onClick={() => { setCurrentView('settings'); setSelectedUpgradeTier(null); }}
+                className="close-settings-btn icon-btn"
+                title="Back to Settings"
               >
-                Send
+                ←
               </button>
             </div>
-            <p className="disclaimer-text">AI can make mistakes. Consider checking important information.</p>
-          </div>
-        </>
-      )}
 
-      {currentView === 'settings' && (
-        <div className="settings-page-full-view"> 
-          <div className="settings-header">
-            <h2>Settings</h2>
-            <button onClick={() => setCurrentView('chat')} className="close-settings-btn icon-btn">✕</button>
-          </div>
-
-          <div className="settings-section account-info">
-            <h3>Account</h3>
-            <p>Email: {session.user?.email}</p>
-            <p>Current Plan: <span className="current-plan-badge">{userProfile ? userProfile.subscription_tier : 'Loading...'}</span></p>
-            {userProfile && userProfile.subscription_tier !== 'Free' && userProfile.subscription_tier !== 'Gold' && userProfile.subscription_expires_at && (
-              <p>Renews on: {new Date(userProfile.subscription_expires_at).toLocaleDateString()}</p>
-            )}
-            {userProfile && userProfile.subscription_tier === 'Free' && (
-              <p>Messages today: {userProfile.message_count_today} / 10</p>
-            )}
-            <div className="support-info">
-              <p className="beta-notice">Keisha AI is currently in Beta. We're continuously improving the experience based on your feedback.</p>
-              <p>Have you discovered a bug or need assistance? <a href="mailto:abitofadviceconsulting@gmail.com" className="support-link">Contact our support team</a>.</p>
+            <div className="settings-section upgrade-summary-section">
+              <h3>Review Your Selection</h3>
+              {selectedUpgradeTier === 'Starter' && (
+                <>
+                  <p><strong>Plan:</strong> Starter</p>
+                  <p><strong>Price:</strong> $9 per month</p>
+                  <p><strong>Features:</strong> Unlimited Uncensored Messages</p>
+                </>
+              )}
+              {selectedUpgradeTier === 'Pro' && (
+                <>
+                  <p><strong>Plan:</strong> Pro</p>
+                  <p><strong>Price:</strong> $59 per year</p>
+                  <p><strong>Features:</strong> Unlimited Uncensored Messages, Save vs. Monthly!</p>
+                </>
+              )}
+              {selectedUpgradeTier === 'Gold' && (
+                <>
+                  <p><strong>Plan:</strong> Gold (Lifetime)</p>
+                  <p><strong>Price:</strong> $99 one-time payment</p>
+                  <p><strong>Features:</strong> Unlimited Uncensored Messages, Lifetime Access, Early Access to New Features</p>
+                </>
+              )}
             </div>
-          </div>
 
-          <div className="settings-section subscription-section">
-            <h3>Subscription Plans</h3>
-            <div className="subscription-tiers-container">
-              <div className="subscription-tier tier-free">
-                <h4>Free</h4>
-                <p className="tier-price">$0</p>
-                <ul className="tier-features">
-                  <li>10 Uncensored Messages/Day</li>
-                </ul>
-                <button className="tier-button disabled-button" disabled>Current Plan</button>
-              </div>
-
-              <div className="subscription-tier tier-starter">
-                <h4>Starter</h4>
-                <p className="tier-price">$9<span className="price-period">/month</span></p>
-                <ul className="tier-features">
-                  <li>Unlimited Uncensored Messages</li>
-                </ul>
-                <button className="tier-button" onClick={() => { setSelectedUpgradeTier('Starter'); setCurrentView('upgradeCheckout'); }}>Upgrade</button>
-              </div>
-
-              <div className="subscription-tier tier-pro">
-                <span className="best-value-badge">Annual Value</span>
-                <h4>Pro</h4>
-                <p className="tier-price">$59<span className="price-period">/year</span></p>
-                <ul className="tier-features">
-                  <li>Unlimited Uncensored Messages</li>
-                  <li>Save vs. Monthly!</li>
-                </ul>
-                <button className="tier-button" onClick={() => { setSelectedUpgradeTier('Pro'); setCurrentView('upgradeCheckout'); }}>Upgrade</button>
-              </div>
-
-              <div className="subscription-tier tier-gold">
-                <span className="best-value-badge">✨ Lifetime Deal! ✨</span>
-                <h4>Gold</h4>
-                <p className="tier-price">$99<span className="price-period"> one-time</span></p>
-                <ul className="tier-features">
-                  <li>Unlimited Uncensored Messages</li>
-                  <li>Lifetime Access</li>
-                  <li>Early Access to New Features</li>
-                </ul>
-                <button className="tier-button tier-button-gold" onClick={() => { setSelectedUpgradeTier('Gold'); setCurrentView('upgradeCheckout'); }}>Go Gold!</button>
-              </div>
+            <div className="settings-section payment-details-section">
+              <h3>Payment Information</h3>
+              <p>To complete your <strong>{selectedUpgradeTier}</strong> subscription, please follow the instructions below:</p>
+              <button onClick={() => handleUpgradePayment(selectedUpgradeTier)} className="tier-button">
+                Proceed to Coinbase
+              </button>
+              {paymentError && <p className="auth-error-message">{paymentError}</p>}
             </div>
-          </div>
 
-          <div className="settings-section upcoming-features">
-            <h3>Coming Soon!</h3>
-            <p className="coming-soon-feature">📞 Voice Calling with Keisha</p>
-          </div>
-          
-          <div className="settings-section payment-options">
-            <h3>Payment Options</h3>
-            <p>We Accept Bitcoin (via Coinbase on the upgrade page).</p>
-            <div className="cash-app-payment">
-              <h4>Pay with Cash App</h4>
-              <div className="cash-app-container">
-                <img 
-                  src={process.env.PUBLIC_URL + '/2cashapp.png'} 
-                  alt="Keisha AI Cash App QR Code" 
-                  className="cash-app-qr" 
-                />
-                <div className="cash-app-instructions">
-                  <p><strong>1.</strong> Scan QR code with Cash App</p>
-                  <p><strong>2.</strong> Send exact amount for your plan:</p>
-                  <ul>
-                    <li><strong>Starter:</strong> $15/month</li>
-                    <li><strong>Pro:</strong> $75/year</li>
-                    <li><strong>Gold:</strong> $150 (lifetime)</li>
-                  </ul>
-                  <p><strong>3.</strong> Include your email in payment note</p>
-                  <p><strong>4.</strong> Account will update within 1 hour</p>
-                </div>
-              </div>
-              <p className="cash-app-id">Cash App ID: <strong>$KeishaAI</strong></p>
-            </div>
-          </div>
-
-          <div className="settings-section sign-out-section">
-            <button onClick={handleSignOut} className="auth-button sign-out-settings-btn">Sign Out</button>
-          </div>
-        </div>
-      )}
-
-      {currentView === 'upgradeCheckout' && selectedUpgradeTier && (
-        <div className="upgrade-checkout-page-full-view settings-page-full-view"> 
-          <div className="settings-header"> 
-            <h2>Complete Your Upgrade to <span style={{textTransform: 'capitalize'}}>{selectedUpgradeTier}</span></h2>
-            <button 
-              onClick={() => { setCurrentView('settings'); setSelectedUpgradeTier(null); }} 
-              className="close-settings-btn icon-btn"
-              title="Back to Settings"
-            >
-              ←
-            </button>
-          </div>
-
-          <div className="settings-section upgrade-summary-section">
-            <h3>Review Your Selection</h3>
-            {selectedUpgradeTier === 'Starter' && (
-              <>
-                <p><strong>Plan:</strong> Starter</p>
-                <p><strong>Price:</strong> $9 per month</p>
-                <p><strong>Features:</strong> Unlimited Uncensored Messages</p>
-              </>
-            )}
-            {selectedUpgradeTier === 'Pro' && (
-              <>
-                <p><strong>Plan:</strong> Pro</p>
-                <p><strong>Price:</strong> $59 per year</p>
-                <p><strong>Features:</strong> Unlimited Uncensored Messages, Save vs. Monthly!</p>
-              </>
-            )}
-            {selectedUpgradeTier === 'Gold' && (
-              <>
-                <p><strong>Plan:</strong> Gold (Lifetime)</p>
-                <p><strong>Price:</strong> $99 one-time payment</p>
-                <p><strong>Features:</strong> Unlimited Uncensored Messages, Lifetime Access, Early Access to New Features</p>
-              </>
-            )}
-          </div>
-
-          <div className="settings-section payment-details-section">
-            <h3>Payment Information</h3>
-            <p>To complete your <strong>{selectedUpgradeTier}</strong> subscription, please follow the instructions below:</p>
-            <button onClick={() => handleUpgradePayment(selectedUpgradeTier)} className="tier-button">
-              Proceed to Coinbase
-            </button>
-            {paymentError && <p className="auth-error-message">{paymentError}</p>}
-          </div>
-
-          <div className="settings-section confirmation-section">
-            <p>Once payment is confirmed, your account will be upgraded. Thank you for choosing Keisha AI!</p>
-            <button 
+            <div className="settings-section confirmation-section">
+              <p>Once payment is confirmed, your account will be upgraded. Thank you for choosing Keisha AI!</p>
+              <button
                 onClick={() => {
-                    setCurrentView('settings'); 
-                    setSelectedUpgradeTier(null);
-                    setPaymentError(''); 
-                }} 
+                  setCurrentView('settings');
+                  setSelectedUpgradeTier(null);
+                  setPaymentError('');
+                }}
                 className="tier-button secondary-tier-button"
-            >
+              >
                 Changed My Mind (Back to Settings)
-            </button>
-          </div>
+              </button>
+            </div>
 
-        </div>
-      )}
+          </div>
+        )}
 
-      {currentView === 'paymentSuccess' && (
-        <div className="payment-result-page settings-page-full-view"> 
-          <div className="settings-header">
-            <h2>Payment Successful!</h2>
+        {currentView === 'paymentSuccess' && (
+          <div className="payment-result-page settings-page-full-view">
+            <div className="settings-header">
+              <h2>Payment Successful!</h2>
+            </div>
+            <div className="settings-section">
+              <p>Thank you for your payment. Your upgrade is being processed.</p>
+              <p>Your chat history and settings will reflect the new plan shortly.</p>
+              {new URLSearchParams(window.location.search).get('chargeId') && (
+                <p>Charge ID: {new URLSearchParams(window.location.search).get('chargeId')}</p>
+              )}
+              <button
+                onClick={() => {
+                  window.history.pushState({}, '', '/');
+                  setCurrentView('chat');
+                }}
+                className="tier-button"
+              >
+                Go to Chat
+              </button>
+            </div>
           </div>
-          <div className="settings-section">
-            <p>Thank you for your payment. Your upgrade is being processed.</p>
-            <p>Your chat history and settings will reflect the new plan shortly.</p>
-            {new URLSearchParams(window.location.search).get('chargeId') && (
-              <p>Charge ID: {new URLSearchParams(window.location.search).get('chargeId')}</p>
-            )}
-            <button 
-              onClick={() => {
-                window.history.pushState({}, '', '/'); 
-                setCurrentView('chat');
-              }}
-              className="tier-button"
-            >
-              Go to Chat
-            </button>
-          </div>
-        </div>
-      )}
+        )}
 
-      {currentView === 'paymentCancelled' && (
-        <div className="payment-result-page settings-page-full-view"> 
-          <div className="settings-header">
-            <h2>Payment Cancelled</h2>
-          </div>
-          <div className="settings-section">
-            <p>Your payment process was cancelled. You have not been charged.</p>
-            <button 
-              onClick={() => {
-                window.history.pushState({}, '', '/'); 
-                setCurrentView('settings');
-              }}
-              className="tier-button"
-            >
-              Back to Settings
-            </button>
-            {selectedUpgradeTier && (
-                 <button 
-                    onClick={() => {
-                        window.history.pushState({}, '', '/'); 
-                        setCurrentView('upgradeCheckout'); 
-                    }}
-                    className="tier-button secondary-tier-button"
-                    >
-                    Try Again with {selectedUpgradeTier} Plan
+        {currentView === 'paymentCancelled' && (
+          <div className="payment-result-page settings-page-full-view">
+            <div className="settings-header">
+              <h2>Payment Cancelled</h2>
+            </div>
+            <div className="settings-section">
+              <p>Your payment process was cancelled. You have not been charged.</p>
+              <button
+                onClick={() => {
+                  window.history.pushState({}, '', '/');
+                  setCurrentView('settings');
+                }}
+                className="tier-button"
+              >
+                Back to Settings
+              </button>
+              {selectedUpgradeTier && (
+                <button
+                  onClick={() => {
+                    window.history.pushState({}, '', '/');
+                    setCurrentView('upgradeCheckout');
+                  }}
+                  className="tier-button secondary-tier-button"
+                >
+                  Try Again with {selectedUpgradeTier} Plan
                 </button>
-            )}
+              )}
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {showPaywallModal && (
-        <div className="paywall-modal">
-          <div className="paywall-modal-content">
-            <h2>Upgrade to Continue</h2>
-            <p>You've reached your daily message limit for the free plan.</p>
-            <p>Consider upgrading to one of our paid plans to continue chatting with Keisha.</p>
-            <button onClick={() => setCurrentView('settings')}>Upgrade Now</button>
-            <button onClick={() => setShowPaywallModal(false)}>Close</button>
+        {showPaywallModal && (
+          <div className="paywall-modal">
+            <div className="paywall-modal-content">
+              <h2>Upgrade to Continue</h2>
+              <p>You've reached your daily message limit for the free plan.</p>
+              <p>Consider upgrading to one of our paid plans to continue chatting with Keisha.</p>
+              <button onClick={() => setCurrentView('settings')}>Upgrade Now</button>
+              <button onClick={() => setShowPaywallModal(false)}>Close</button>
+            </div>
           </div>
-        </div>
-      )}
-    </div>
+        )}
+      </div>
     </>
   );
 }

@@ -42,7 +42,7 @@ const Waitlist = () => {
   return (
     <div className="waitlist-container" id="waitlist">
       <h2>Join the Waitlist</h2>
-      <p>Be the first to know when Keisha AI is available.</p>
+      <p>Join the waitlist to get early access with discounted and limited lifetime access pricing.</p>
       <form onSubmit={handleSubmit(onSubmit)} className="waitlist-form">
         <input
           type="email"

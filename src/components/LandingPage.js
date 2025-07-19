@@ -1,18 +1,49 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import Waitlist from './Waitlist';
+import LoginModal from './LoginModal';
 import './LandingPage.css';
 
 const LandingPage = () => {
+  const [showLoginModal, setShowLoginModal] = useState(false);
+
   return (
     <div className="landing-container">
+      {/* Login Button - Fixed position */}
+      <button 
+        className="login-button"
+        onClick={() => setShowLoginModal(true)}
+      >
+        Admin Login
+      </button>
+
       <section className="hero-section">
         <div className="hero-content">
           <h1>Keisha AI: The Uncensored Counter-Racist Scholar</h1>
+          
+          {/* Welcome Video */}
+          <div className="welcome-video-container">
+            <video 
+              className="welcome-video"
+              autoPlay 
+              muted 
+              playsInline
+              onEnded={(e) => e.target.style.display = 'none'}
+            >
+              <source src="/welcome.mp4" type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
+          </div>
+
           <p>The world's first AI chatbot fine-tuned to dismantle white supremacy, not coddle it.</p>
           <a href="#waitlist" className="cta-button">Join the Waitlist</a>
         </div>
       </section>
+
+      {/* Login Modal */}
+      {showLoginModal && (
+        <LoginModal onClose={() => setShowLoginModal(false)} />
+      )}
 
       <section className="problem-section">
         <h2>The Problem: White Fragility in AI</h2>
