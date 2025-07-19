@@ -101,7 +101,7 @@ body {
   box-sizing: border-box;
 }
 
-.app-contaiground image is set inline in App.js for desktop */
+/* app-container background image is set inline in App.js for desktop */
 .app-container-authed {
   background-color: var(--color-background);
   display: flex;
