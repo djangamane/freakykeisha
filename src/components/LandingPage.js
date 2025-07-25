@@ -19,7 +19,7 @@ const LandingPage = () => {
 
       <section className="hero-section">
         <div className="hero-content">
-          <h1>Keisha AI: Enterprise AI Ethics & Bias Detection</h1>
+          <h1>Keisha AI: AI Ethics & Bias Detection</h1>
           
           {/* Welcome Video */}
           <div className="welcome-video-container">
@@ -35,8 +35,8 @@ const LandingPage = () => {
             </video>
           </div>
 
-          <p>Advanced AI ethics platform specializing in racial bias detection and white fragility analysis for enterprise AI systems.</p>
-          <a href="#waitlist" className="cta-button">Request Enterprise Demo</a>
+          <p>Advanced AI ethics platform specializing in racial bias detection and white fragility analysis for enterprise AI systems and general learning purposes for universities, students, and social equity initiatives.</p>
+          <a href="#waitlist" className="cta-button">Join the Waitlist</a>
         </div>
       </section>
 
@@ -84,36 +84,22 @@ const LandingPage = () => {
             <p>Real-time monitoring and reporting for compliance teams</p>
           </div>
           <div className="feature-item">
-            <h3>⚖️ Regulatory Compliance</h3>
-            <p>Meet EU AI Act and emerging US guidelines for ethical AI</p>
-          </div>
-          <div className="feature-item">
             <h3>🎯 Counter-Racist Expertise</h3>
             <p>Specialized analysis based on proven counter-racist scholarship</p>
           </div>
         </div>
         
-        <div className="keisha-showcase">
-          <img 
-            src="/keish.png" 
-            alt="Keisha AI Platform" 
-            className="keisha-image"
-          />
-        </div>
+
       </section>
 
       <section className="creator-section">
         <h2>Enterprise-Ready AI Ethics</h2>
-        <p>Built by Janga Bussaja and Planetary Chess Inc, Keisha AI represents years of research into AI bias detection and counter-racist methodology. Our platform serves Fortune 500 companies, government agencies, and AI ethics consulting firms who need specialized tools to identify and mitigate racial bias in their AI systems.</p>
+        <p>Built by Janga Bussaja and Planetary Chess Inc, Keisha AI represents years of research into AI bias detection and counter-racist methodology. Our platform serves Fortune 500 companies, government agencies, AI ethics consulting firms, universities, students, and anyone seeking to understand and address racial bias in AI systems or learn more about racism in general.</p>
         
         <div className="enterprise-benefits">
           <div className="benefit-item">
             <h3>🏢 Fortune 500 Ready</h3>
             <p>Enterprise-grade security, scalability, and compliance</p>
-          </div>
-          <div className="benefit-item">
-            <h3>📋 Regulatory Compliance</h3>
-            <p>Meet EU AI Act and emerging US ethical AI requirements</p>
           </div>
           <div className="benefit-item">
             <h3>🔬 Research-Backed</h3>

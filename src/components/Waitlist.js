@@ -41,27 +41,27 @@ const Waitlist = () => {
 
   return (
     <div className="waitlist-container" id="waitlist">
-      <h2>Request Enterprise Demo</h2>
-      <p>Get early access to Keisha AI's enterprise platform with special pilot pricing for qualifying organizations.</p>
+      <h2>Join the Waitlist</h2>
+      <p>Get early access to Keisha AI's platform - whether you're an enterprise, university, student, or individual interested in AI ethics and counter-racist education.</p>
       <form onSubmit={handleSubmit(onSubmit)} className="waitlist-form">
         <input
           type="email"
-          placeholder="Enter your business email"
+          placeholder="Enter your email"
           {...register('email', { required: true, pattern: /^\S+@\S+$/i })}
           disabled={isSubmitting}
         />
         <button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? 'Requesting...' : 'Request Demo'}
+          {isSubmitting ? 'Joining...' : 'Join Waitlist'}
         </button>
       </form>
-      {errors.email && <p className="error-message">A valid business email is required.</p>}
+      {errors.email && <p className="error-message">A valid email is required.</p>}
       {message && (
         <p className={`form-message ${isError ? 'error-message' : 'success-message'}`}>
           {message}
         </p>
       )}
       <div className="enterprise-note">
-        <p><strong>Enterprise Features:</strong> API Integration • Custom Deployment • Dedicated Support • Compliance Reporting</p>
+        <p><strong>Available For:</strong> Enterprises • Universities • Students • Researchers • Individual Learners</p>
       </div>
     </div>
   );
