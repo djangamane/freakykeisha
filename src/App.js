@@ -430,7 +430,7 @@ function App() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${process.env.REACT_APP_HF_TOKEN || ''}`, // For Hugging Face if needed
+          "Authorization": `Bearer ${session?.access_token || 'default-token'}`, // Use Supabase session token
         },
         body: JSON.stringify(requestBody),
       });
