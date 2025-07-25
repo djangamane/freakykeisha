@@ -107,6 +107,9 @@ function App() {
   const isFetchingProfile = useRef(false);
   const [loadingProfile, setLoadingProfile] = useState(false); // Initialize to false, true when fetching
   const [profileError, setProfileError] = useState(null);
+  const [enterpriseDemoEmail, setEnterpriseDemoEmail] = useState('');
+  const [enterpriseDemoMessage, setEnterpriseDemoMessage] = useState('');
+  const [enterpriseDemoLoading, setEnterpriseDemoLoading] = useState(false);
 
   // Handle window resize to detect mobile vs desktop
   useEffect(() => {
@@ -551,6 +554,37 @@ function App() {
     await supabase.auth.signOut();
   };
 
+  const handleEnterpriseDemoRequest = async (e) => {
+    e.preventDefault();
+    setEnterpriseDemoMessage('');
+    setEnterpriseDemoLoading(true);
+
+    try {
+      const { error } = await supabase
+        .from('enterprise_demo_requests')
+        .insert([{ 
+          email: enterpriseDemoEmail,
+          user_id: session?.user?.id || null,
+          requested_at: new Date().toISOString()
+        }]);
+
+      if (error) {
+        if (error.code === '23505') { // Unique constraint violation
+          setEnterpriseDemoMessage('You have already requested an enterprise demo. We will contact you soon!');
+        } else {
+          setEnterpriseDemoMessage(`Error submitting request: ${error.message}`);
+        }
+      } else {
+        setEnterpriseDemoMessage('Thank you for your interest! Our enterprise team will contact you within 24 hours.');
+        setEnterpriseDemoEmail('');
+      }
+    } catch (err) {
+      setEnterpriseDemoMessage(`An unexpected error occurred: ${err.message}`);
+    } finally {
+      setEnterpriseDemoLoading(false);
+    }
+  };
+
   const handleUpgradePayment = async (tier) => {
     setSelectedUpgradeTier(tier);
     setPaymentError('');
@@ -696,11 +730,14 @@ function App() {
 
                 {/* Suggestion Chips */}
                 <div className="suggestion-chips">
+                  <div className="suggestion-chip" onClick={() => setInputValue("How can we detect racial bias in our AI systems?")}>
+                    How can we detect racial bias in our AI systems?
+                  </div>
                   <div className="suggestion-chip" onClick={() => setInputValue("What is white supremacy?")}>
                     What is white supremacy?
                   </div>
-                  <div className="suggestion-chip" onClick={() => setInputValue("How does systemic racism work?")}>
-                    How does systemic racism work?
+                  <div className="suggestion-chip" onClick={() => setInputValue("What are enterprise AI ethics best practices?")}>
+                    What are enterprise AI ethics best practices?
                   </div>
                   <div className="suggestion-chip" onClick={() => setInputValue("Explain counter-racist strategies")}>
                     Explain counter-racist strategies
@@ -863,6 +900,50 @@ function App() {
               <div className="support-info">
                 <p className="beta-notice">Keisha AI is currently in Beta. We're continuously improving the experience based on your feedback.</p>
                 <p>Have you discovered a bug or need assistance? <a href="mailto:abitofadviceconsulting@gmail.com" className="support-link">Contact our support team</a>.</p>
+              </div>
+            </div>
+
+            <div className="settings-section enterprise-demo-section">
+              <h3>Enterprise Solutions</h3>
+              <p>Interested in enterprise-grade AI ethics and bias detection for your organization? Request a personalized demo to see how Keisha AI can help your team identify and mitigate racial bias in AI systems.</p>
+              
+              <form onSubmit={handleEnterpriseDemoRequest} className="enterprise-demo-form">
+                <div className="form-group">
+                  <label htmlFor="enterprise-email">Business Email:</label>
+                  <input
+                    id="enterprise-email"
+                    type="email"
+                    value={enterpriseDemoEmail}
+                    onChange={(e) => setEnterpriseDemoEmail(e.target.value)}
+                    placeholder="your.email@company.com"
+                    required
+                    disabled={enterpriseDemoLoading}
+                  />
+                </div>
+                <button 
+                  type="submit" 
+                  className="enterprise-demo-btn"
+                  disabled={enterpriseDemoLoading || !enterpriseDemoEmail.trim()}
+                >
+                  {enterpriseDemoLoading ? 'Requesting...' : 'Request Enterprise Demo'}
+                </button>
+              </form>
+              
+              {enterpriseDemoMessage && (
+                <p className={`enterprise-demo-message ${enterpriseDemoMessage.includes('Error') ? 'error-message' : 'success-message'}`}>
+                  {enterpriseDemoMessage}
+                </p>
+              )}
+              
+              <div className="enterprise-features">
+                <h4>Enterprise Features Include:</h4>
+                <ul>
+                  <li>🔍 Advanced racial bias detection in LLM outputs</li>
+                  <li>📊 Real-time monitoring dashboard</li>
+                  <li>📋 Compliance reporting for regulatory requirements</li>
+                  <li>🔧 API integration for existing workflows</li>
+                  <li>👥 Dedicated support and training</li>
+                </ul>
               </div>
             </div>
 
