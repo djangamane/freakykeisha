@@ -588,7 +588,7 @@ function App() {
 
     try {
       console.log("Attempting to create Coinbase charge (frontend) with requestBody:", paymentRequestBody);
-      const response = await fetch("http://localhost:3001/api/create-coinbase-charge", {
+      const response = await fetch("https://freaky-keisha-backend.onrender.com/api/create-coinbase-charge", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
