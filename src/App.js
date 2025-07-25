@@ -940,7 +940,6 @@ function App() {
                 <ul>
                   <li>🔍 Advanced racial bias detection in LLM outputs</li>
                   <li>📊 Real-time monitoring dashboard</li>
-                  <li>📋 Compliance reporting for regulatory requirements</li>
                   <li>🔧 API integration for existing workflows</li>
                   <li>👥 Dedicated support and training</li>
                 </ul>
@@ -993,10 +992,7 @@ function App() {
               </div>
             </div>
 
-            <div className="settings-section upcoming-features">
-              <h3>Coming Soon!</h3>
-              <p className="coming-soon-feature">📞 Voice Calling with Keisha</p>
-            </div>
+
 
             <div className="settings-section payment-options">
               <h3>Payment Options</h3>
