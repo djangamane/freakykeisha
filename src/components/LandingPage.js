@@ -21,20 +21,6 @@ const LandingPage = () => {
         <div className="hero-content">
           <h1>Keisha AI: AI Ethics & Bias Detection</h1>
           
-          {/* Welcome Video */}
-          <div className="welcome-video-container">
-            <video 
-              className="welcome-video"
-              autoPlay 
-              muted 
-              playsInline
-              onEnded={(e) => e.target.style.display = 'none'}
-            >
-              <source src="/welcome.mp4" type="video/mp4" />
-              Your browser does not support the video tag.
-            </video>
-          </div>
-
           <p>Advanced AI ethics platform specializing in racial bias detection and white fragility analysis for enterprise AI systems and general learning purposes for universities, students, and social equity initiatives.</p>
           <a href="#waitlist" className="cta-button">Join the Waitlist</a>
         </div>
@@ -125,6 +111,22 @@ const LandingPage = () => {
       </section>
 
       <Waitlist />
+
+      <section className="welcome-video-section">
+        <h2>Welcome Message from Keisha</h2>
+        <p>Click play to hear a personal welcome message about Keisha AI's mission and capabilities.</p>
+        
+        <div className="welcome-video-container">
+          <video 
+            className="welcome-video"
+            controls
+            preload="metadata"
+          >
+            <source src="/welcome.mp4" type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
+        </div>
+      </section>
     </div>
   );
 };
