@@ -113,8 +113,7 @@ const LandingPage = () => {
       <Waitlist />
 
       <section className="welcome-video-section">
-        <h2>Welcome Message from Keisha</h2>
-        <p>Click play to hear a personal welcome message about Keisha AI's mission and capabilities.</p>
+        <h2>Keisha AI</h2>
         
         <div className="welcome-video-container">
           <video 
