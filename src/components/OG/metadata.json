@@ -1,0 +1,6 @@
+{
+  "name": "White Fragility Detector (Keisha)",
+  "description": "An AI-powered system to detect 'white fragility' in news articles, provide an analysis with a racial bias score, and translate the article to expose what it identifies as underlying euphemisms.",
+  "requestFramePermissions": [],
+  "prompt": ""
+}

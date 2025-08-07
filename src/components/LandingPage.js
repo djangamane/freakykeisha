@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import Waitlist from './Waitlist';
 import LoginModal from './LoginModal';
 import './LandingPage.css';
@@ -9,19 +10,28 @@ const LandingPage = () => {
 
   return (
     <div className="landing-container">
-      {/* Login Button - Fixed position */}
-      <button 
-        className="login-button"
-        onClick={() => setShowLoginModal(true)}
-      >
-        Admin Login
-      </button>
+      {/* Navigation Header */}
+      <nav className="navigation-header">
+        <div className="nav-links">
+          <Link to="/pricing" className="nav-link">Pricing</Link>
+          <Link to="/faq" className="nav-link">FAQ</Link>
+          <Link to="/bias-detection" className="nav-link">Fragile News Decoder</Link>
+        </div>
+        {/* Login Button - Fixed position */}
+        <button 
+          className="login-button"
+          onClick={() => setShowLoginModal(true)}
+        >
+          Admin Login
+        </button>
+      </nav>
 
       <section className="hero-section">
         <div className="hero-content">
           <h1>Keisha AI: AI Ethics & Bias Detection</h1>
-          
+
           <p>Advanced AI ethics platform specializing in racial bias detection and white fragility analysis for enterprise AI systems and general learning purposes for universities, students, and social equity initiatives.</p>
+
           <a href="#waitlist" className="cta-button">Join the Waitlist</a>
         </div>
       </section>
@@ -32,8 +42,8 @@ const LandingPage = () => {
       )}
 
       <section className="problem-section">
-        <h2>The Problem: Hidden Bias in Enterprise AI</h2>
-        <p>Enterprise AI systems contain subtle but dangerous racial biases that traditional testing tools miss. Our research reveals "white fragility" patterns in leading LLMs - where AI models systematically avoid addressing systemic racism, creating compliance risks and reputational threats for organizations deploying these systems at scale.</p>
+        <h2>The Problem: Fragile News & Hidden Bias in AI</h2>
+        <p>Mainstream media produces "fragile news" - reporting that appears neutral but systematically protects white supremacist narratives through coded language and strategic omissions. Meanwhile, enterprise AI systems trained on this biased content perpetuate these patterns, creating compliance risks and reputational threats for organizations deploying these systems at scale.</p>
         
         <div className="research-showcase">
           <img 
@@ -57,13 +67,13 @@ const LandingPage = () => {
       </section>
 
       <section className="solution-section">
-        <h2>The Solution: Keisha AI Platform</h2>
-        <p>Keisha AI provides enterprise-grade bias detection specifically designed to identify racial bias and white fragility patterns that other tools miss. Built on the scholarly work of Dr. Frances Cress Welsing and Dr. Amos Wilson, our platform offers uncompromising analysis to help organizations ensure their AI systems meet ethical standards and regulatory compliance requirements.</p>
+        <h2>The Solution: Keisha AI Platform & Fragile News Decoder</h2>
+        <p>Keisha AI provides enterprise-grade bias detection specifically designed to identify racial bias and white fragility patterns that other tools miss. Our flagship Fragile News Decoder tool exposes the coded language and strategic omissions in mainstream media, offering the public a powerful weapon against fake and fragile news. Built on the scholarly work of Dr. Frances Cress Welsing and Dr. Amos Wilson, our platform offers uncompromising analysis for both enterprise compliance and public education.</p>
         
         <div className="features-grid">
           <div className="feature-item">
-            <h3>🔍 Advanced Bias Detection</h3>
-            <p>Identify subtle racial biases and white fragility patterns in LLM outputs</p>
+            <h3>🔍 Fragile News Decoder</h3>
+            <p>Expose coded language and white fragility patterns in mainstream media reporting</p>
           </div>
           <div className="feature-item">
             <h3>📊 Enterprise Dashboard</h3>
@@ -76,6 +86,14 @@ const LandingPage = () => {
         </div>
         
 
+      </section>
+
+      <section className="fragile-news-section">
+        <div className="fragile-news-intro">
+          <h2>Introducing the Fragile News Decoder Tool</h2>
+          <p>White fragility permeates mainstream media, creating "fragile news" that protects white supremacist narratives while appearing neutral. Our Fragile News Decoder AI exposes these patterns, translating coded language and revealing the true agenda behind seemingly objective reporting.</p>
+          <Link to="/bias-detection" className="decoder-cta-button">Try the Fragile News Decoder</Link>
+        </div>
       </section>
 
       <section className="creator-section">

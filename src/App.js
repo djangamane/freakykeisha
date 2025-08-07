@@ -1,8 +1,14 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 import { createClient } from '@supabase/supabase-js';
 import LandingPage from './components/LandingPage';
-import "./App.css";
+import PricingPage from './components/PricingPage';
+import FAQ from './components/FAQ';
+import MicrofragApp from './components/microfrag/App.tsx';
+import BiasDetectorOriginal from './components/BiasDetectorOriginal.js';
+import { BiasAuthProvider } from './contexts/BiasAuthContext';
+// import "./App.css"; // Temporarily disabled to test Tailwind
 
 // Use environment variables for Supabase credentials
 const SUPABASE_URL = process.env.REACT_APP_SUPABASE_URL;
@@ -17,6 +23,11 @@ if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
 }
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// Make supabase instance globally available for microfrag components
+if (typeof window !== 'undefined') {
+  window.supabase = supabase;
+}
 
 const kb3ImageUrl = process.env.PUBLIC_URL + '/kb3.png'; // Chat page desktop background
 const desktopLandingImageUrl = process.env.PUBLIC_URL + '/kbf.png'; // Landing page desktop background
@@ -675,7 +686,19 @@ function App() {
 
   // If we reach here, loadingAuthState AND loadingProfile are BOTH false.
   if (!session) {
-    return <LandingPage />;
+    return (
+      <BiasAuthProvider>
+        <Router>
+          <Routes>
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/pricing" element={<PricingPage />} />
+            <Route path="/faq" element={<FAQ />} />
+            <Route path="/bias-detection" element={<MicrofragApp />} />
+            <Route path="/detector" element={<Navigate to="/bias-detection" replace />} />
+          </Routes>
+        </Router>
+      </BiasAuthProvider>
+    );
   }
 
   return (
@@ -771,6 +794,7 @@ function App() {
                         <hr />
                         <h3>Options</h3>
                         <ul className="options-list">
+                          <li onClick={() => setCurrentView('biasDetection')}>Bias Detection</li>
                           <li onClick={() => setCurrentView('settings')}>Settings</li>
                           <li onClick={handleSignOut}>Sign Out</li>
                         </ul>
@@ -870,6 +894,7 @@ function App() {
                     <hr />
                     <h3>Options</h3>
                     <ul className="options-list">
+                      <li onClick={() => setCurrentView('biasDetection')}>Bias Detection</li>
                       <li onClick={() => setCurrentView('settings')}>Settings</li>
                       <li onClick={handleSignOut}>Sign Out</li>
                     </ul>
@@ -878,6 +903,18 @@ function App() {
               </div>
             )}
           </>
+        )}
+
+        {currentView === 'biasDetection' && (
+          <div className="settings-page-full-view">
+            <div className="settings-header">
+              <h2>Bias Detection</h2>
+              <button onClick={() => setCurrentView('chat')} className="close-settings-btn icon-btn">✕</button>
+            </div>
+            <div style={{ height: 'calc(100vh - 80px)', overflow: 'hidden' }}>
+              <MicrofragApp session={session} userProfile={userProfile} />
+            </div>
+          </div>
         )}
 
         {currentView === 'settings' && (
