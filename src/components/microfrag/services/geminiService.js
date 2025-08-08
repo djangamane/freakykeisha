@@ -301,7 +301,7 @@ export const analyzeAndTranslateArticle = async (text, authToken = null) => {
       });
 
       // Transform backend response to match expected frontend format
-      const analysisSummary = data.analysis.explanation || "Analysis completed successfully.";
+      const analysisSummary = data.analysis.analysis_summary || data.analysis.explanation || "Analysis completed successfully.";
       console.log('Analysis summary debug:', {
         hasExplanation: !!data.analysis.explanation,
         explanationLength: data.analysis.explanation?.length,
@@ -310,7 +310,7 @@ export const analyzeAndTranslateArticle = async (text, authToken = null) => {
       });
 
       // Convert score from 0-1 range to 0-100 range for display
-      const rawScore = data.analysis.bias_score || 0;
+      const rawScore = data.analysis.score || data.analysis.bias_score || 0;
       const displayScore = rawScore <= 1 ? Math.round(rawScore * 100) : Math.round(rawScore);
 
       console.log('Score conversion debug:', {
