@@ -51,8 +51,14 @@ const BiasAuthGuard = ({ children, requireAuth = true, fallback = null }) => {
     }
 
     return (
-      <>
-        <div style={{
+      <div style={{ position: 'relative', minHeight: '60vh', overflow: 'hidden' }}>
+        {/* Matrix Video Background */}
+        <video autoPlay loop muted playsInline className="matrix-bg-video">
+          <source src="/matrix.mp4" type="video/mp4" />
+        </video>
+
+        {/* Foreground Content */}
+        <div className="matrix-bg-overlay" style={{
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
@@ -105,7 +111,7 @@ const BiasAuthGuard = ({ children, requireAuth = true, fallback = null }) => {
           onAuthSuccess={() => setShowAuthModal(false)}
           onGuestMode={() => setShowAuthModal(false)}
         />
-      </>
+      </div>
     );
   }
 

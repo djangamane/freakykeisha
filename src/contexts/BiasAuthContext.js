@@ -207,9 +207,19 @@ export const BiasAuthProvider = ({ children }) => {
         body: JSON.stringify({ email, password })
       });
 
-      const data = await response.json();
+      // Check if response is JSON before parsing
+      const contentType = response.headers.get('content-type') || '';
+      let data = null;
 
-      if (data.success) {
+      if (contentType.includes('application/json')) {
+        data = await response.json();
+      } else {
+        // Non-JSON response (likely HTML error page)
+        const text = await response.text();
+        throw new Error(`Server returned ${response.status}: ${response.statusText}. Please check your API configuration.`);
+      }
+
+      if (response.ok && data && data.success) {
         const user = {
           ...data.user,
           sessionCreated: Date.now(),
@@ -230,7 +240,7 @@ export const BiasAuthProvider = ({ children }) => {
 
         return { success: true };
       } else {
-        throw new Error(data.error?.message || 'Login failed');
+        throw new Error(data?.error?.message || `Login failed (${response.status})`);
       }
     } catch (error) {
       let errorMessage = error.message;
@@ -271,9 +281,19 @@ export const BiasAuthProvider = ({ children }) => {
         body: JSON.stringify({ email, password })
       });
 
-      const data = await response.json();
+      // Check if response is JSON before parsing
+      const contentType = response.headers.get('content-type') || '';
+      let data = null;
 
-      if (data.success) {
+      if (contentType.includes('application/json')) {
+        data = await response.json();
+      } else {
+        // Non-JSON response (likely HTML error page)
+        const text = await response.text();
+        throw new Error(`Server returned ${response.status}: ${response.statusText}. Please check your API configuration.`);
+      }
+
+      if (response.ok && data && data.success) {
         const user = {
           ...data.user,
           sessionCreated: Date.now(),
@@ -294,7 +314,7 @@ export const BiasAuthProvider = ({ children }) => {
 
         return { success: true };
       } else {
-        throw new Error(data.error?.message || 'Registration failed');
+        throw new Error(data?.error?.message || `Registration failed (${response.status})`);
       }
     } catch (error) {
       let errorMessage = error.message;

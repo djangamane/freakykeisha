@@ -124,8 +124,14 @@ const BiasAuthModal = ({ isOpen, onClose, onAuthSuccess, onGuestMode }) => {
 
   return (
     <ErrorBoundary>
-      <div className="login-modal-overlay">
-        <div className="login-modal">
+      <div className="login-modal-overlay" style={{ position: 'fixed' }}>
+        {/* Matrix Background Video */}
+        <video autoPlay loop muted playsInline className="matrix-bg-video">
+          <source src="/matrix.mp4" type="video/mp4" />
+        </video>
+
+        {/* Modal Content */}
+        <div className="login-modal matrix-bg-overlay">
           <div className="login-modal-header">
             <h2>{isLogin ? 'Sign In' : 'Create Account'}</h2>
             <button className="close-button" onClick={onClose}>
@@ -205,8 +211,8 @@ const BiasAuthModal = ({ isOpen, onClose, onAuthSuccess, onGuestMode }) => {
             </div>
           )}
 
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             className="login-submit-btn"
             disabled={isLoading}
           >
@@ -261,17 +267,17 @@ const BiasAuthModal = ({ isOpen, onClose, onAuthSuccess, onGuestMode }) => {
           </button>
         </div>
 
-        <div style={{ 
-          marginTop: '1rem', 
-          padding: '1rem', 
-          backgroundColor: 'rgba(0, 255, 255, 0.1)', 
+        <div style={{
+          marginTop: '1rem',
+          padding: '1rem',
+          backgroundColor: 'rgba(0, 255, 255, 0.1)',
           borderRadius: '10px',
           border: '1px solid var(--accent-color)',
           fontSize: '0.85rem',
           color: 'var(--text-color)',
           textAlign: 'center'
         }}>
-          <strong style={{ color: 'var(--accent-color)' }}>Guest Mode:</strong> Try our bias detection service with 3 free analyses per day. 
+          <strong style={{ color: 'var(--accent-color)' }}>Guest Mode:</strong> Try our bias detection service with 3 free analyses per day.
           No account required - we track usage by IP address.
         </div>
       </div>
