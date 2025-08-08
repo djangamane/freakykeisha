@@ -87,6 +87,9 @@ export const useUsageEnforcement = () => {
       console.log('useUsageEnforcement: result keys:', result ? Object.keys(result) : 'null');
       console.log('useUsageEnforcement: result.analysis:', result?.analysis);
       console.log('useUsageEnforcement: result.translation:', result?.translation);
+      console.log('useUsageEnforcement: result.success:', result?.success);
+      console.log('useUsageEnforcement: result.usage:', result?.usage);
+      console.log('useUsageEnforcement: FULL RESULT STRUCTURE:', JSON.stringify(result, null, 2));
 
       // If analysis was successful, increment usage count
       if (result.success) {
@@ -147,14 +150,10 @@ export const useUsageEnforcement = () => {
       try {
         const result = await analyzeAndTranslateArticle(articleText);
 
-        // Transform the result to match expected format
-        return {
-          success: true,
-          data: {
-            analysis: result.analysis,
-            translation: result.translation
-          }
-        };
+        // Return the result as-is since geminiService now returns the correct structure
+        console.log('executeRealAnalysis: Received from geminiService:', result);
+        console.log('executeRealAnalysis: Result keys:', Object.keys(result));
+        return result;
       } catch (error) {
         // Re-throw to let executeWithUsageCheck handle it
         throw error;
