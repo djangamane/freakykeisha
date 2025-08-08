@@ -70,6 +70,7 @@ export const testBackendConnection = async () => {
 };
 
 // Combined function to get both analysis and translation in one request
+// Updated: 2025-08-08 - Fixed production response structure
 export const analyzeAndTranslateArticle = async (text, authToken = null) => {
   if (!text || !text.trim()) {
     throw new Error("Article text is required for analysis");
@@ -356,13 +357,17 @@ export const analyzeAndTranslateArticle = async (text, authToken = null) => {
         console.log('Using fallback Keisha translation');
       }
 
-      console.log('Transformed analysis and translation result:', { success: true, analysis: transformedAnalysis, translation });
-      return {
+      const finalResult = {
         success: true,
         analysis: transformedAnalysis,
         translation: translation,
         usage: data.usage // Pass through usage data from backend
       };
+      console.log('Transformed analysis and translation result:', finalResult);
+      console.log('PRODUCTION DEBUG - Final result keys:', Object.keys(finalResult));
+      console.log('PRODUCTION DEBUG - Has success:', !!finalResult.success);
+      console.log('PRODUCTION DEBUG - Has analysis:', !!finalResult.analysis);
+      return finalResult;
     } else {
       console.error('Backend response missing success or analysis:', data);
       throw new Error(data.error?.message || 'Analysis failed');
