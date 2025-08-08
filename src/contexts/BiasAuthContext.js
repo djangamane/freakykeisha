@@ -454,7 +454,7 @@ export const BiasAuthProvider = ({ children }) => {
     return false; // No reset needed
   };
 
-  // Sync usage with backend
+  // Get current usage from backend (replaces problematic sync endpoint)
   const syncUsageWithBackend = async () => {
     if (!state.user) {
       return { success: false, error: 'No user found' };
@@ -480,25 +480,24 @@ export const BiasAuthProvider = ({ children }) => {
         return { success: false, error: 'No authentication token found' };
       }
 
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/bias-usage/sync`, {
-        method: 'POST',
+      // Use the confirmed working endpoint instead of problematic sync
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/bias-usage/current`, {
+        method: 'GET',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          user_id: state.user.id,
-          current_usage: state.user.daily_usage_count
-        })
+        }
       });
 
       if (response.ok) {
         const data = await response.json();
-        if (data.success && data.user) {
-          // Update user data with backend sync
+        if (data.success && data.usage) {
+          // Update user data with current usage from backend
           const updatedUser = {
             ...state.user,
-            ...data.user,
+            daily_usage_count: data.usage.daily_count || 0,
+            daily_limit: data.usage.limit || data.usage.daily_limit || 3,
+            subscription_tier: data.usage.subscription_tier || 'free',
             last_usage_reset: new Date().toDateString()
           };
 
@@ -510,11 +509,14 @@ export const BiasAuthProvider = ({ children }) => {
             payload: updatedUser
           });
 
-          return { success: true, canAnalyze: data.can_analyze, user: updatedUser };
+          // Determine if user can analyze based on usage data
+          const canAnalyze = data.usage.remaining > 0 || data.usage.unlimited || data.usage.daily_limit === null;
+
+          return { success: true, canAnalyze, user: updatedUser };
         }
       }
 
-      return { success: false, error: 'Failed to sync with backend' };
+      return { success: false, error: 'Failed to get current usage from backend' };
     } catch (error) {
       console.error('Usage sync failed:', error);
       return { success: false, error: 'Network error during sync' };
