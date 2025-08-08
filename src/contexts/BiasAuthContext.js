@@ -272,6 +272,10 @@ export const BiasAuthProvider = ({ children }) => {
   const register = async (email, password) => {
     dispatch({ type: AUTH_ACTIONS.LOGIN_START });
 
+    // Debug log to check environment variable
+    console.log('REACT_APP_API_URL:', process.env.REACT_APP_API_URL);
+    console.log('Full URL:', `${process.env.REACT_APP_API_URL}/api/bias-auth/register`);
+
     try {
       const response = await fetch(`${process.env.REACT_APP_API_URL}/api/bias-auth/register`, {
         method: 'POST',
