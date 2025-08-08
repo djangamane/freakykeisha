@@ -41,8 +41,8 @@ const App: React.FC = () => {
       const result = await executeRealAnalysis(articleText);
 
       if (result.success) {
-        setAnalysisResult(result.data.analysis);
-        setTranslatedText(result.data.translation);
+        setAnalysisResult(result.analysis);
+        setTranslatedText(result.translation);
       } else {
         // Don't show error if paywall should be shown
         if (!result.showPaywall) {
