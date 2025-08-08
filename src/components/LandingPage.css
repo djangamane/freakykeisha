@@ -1266,8 +1266,8 @@ ricing Page Specific Styles */
   .bitcoin-btn::before {
     display: none; /* Hide the recommendation badge on very small screens */
   }
-}/* 
-Error Boundary Styles */
+}
+/* Error Boundary Styles */
 .error-boundary-container {
   display: flex;
   justify-content: center;
@@ -1597,8 +1597,8 @@ Error Boundary Styles */
 .loading-cancel-button:hover {
   background: rgba(255, 0, 0, 0.3);
   transform: translateY(-2px);
-}/
-* Network Error Additional Styles */
+}
+/* Network Error Additional Styles */
 .network-error-actions {
   display: flex;
   gap: 1rem;

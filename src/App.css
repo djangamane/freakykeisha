@@ -1876,8 +1876,8 @@ ding States and Micro-interactions */
     transform: translateX(100%);
     opacity: 0;
   }
-}/* A
-ccessibility Improvements */
+}
+/* Accessibility Improvements */
 
 /* High Contrast Mode Support */
 @media (prefers-contrast: high) {
