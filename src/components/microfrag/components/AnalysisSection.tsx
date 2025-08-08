@@ -52,7 +52,7 @@ const AnalysisSection: React.FC<AnalysisSectionProps> = ({ analysisResult, isLoa
             ))}
           </div>
         ) : (
-          <p className="text-green-300/50 font-mono">No specific euphemisms from the list were detected.</p>
+          <p className="text-green-300/50 font-mono">No fragile euphemisms detected.</p>
         )}
       </div>
 
