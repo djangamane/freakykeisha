@@ -356,10 +356,12 @@ export const analyzeAndTranslateArticle = async (text, authToken = null) => {
         console.log('Using fallback Keisha translation');
       }
 
-      console.log('Transformed analysis and translation result:', { analysis: transformedAnalysis, translation });
+      console.log('Transformed analysis and translation result:', { success: true, analysis: transformedAnalysis, translation });
       return {
+        success: true,
         analysis: transformedAnalysis,
-        translation: translation
+        translation: translation,
+        usage: data.usage // Pass through usage data from backend
       };
     } else {
       console.error('Backend response missing success or analysis:', data);
@@ -381,8 +383,10 @@ export const analyzeAndTranslateArticle = async (text, authToken = null) => {
       if (ENABLE_MOCK_MODE) {
         console.warn('Backend error, falling back to mock data:', error.message);
         return {
+          success: true,
           analysis: getMockAnalysis(text),
-          translation: getMockTranslation(text)
+          translation: getMockTranslation(text),
+          usage: { daily_count: 1, daily_limit: 3, remaining: 2 }
         };
       }
       throw new Error(error.message || "Failed to get analysis from AI agent.");
