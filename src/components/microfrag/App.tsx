@@ -40,9 +40,17 @@ const App: React.FC = () => {
       // Use usage-enforced analysis instead of direct API call
       const result = await executeRealAnalysis(articleText);
 
+      console.log('App.tsx: Received result from executeRealAnalysis:', result);
+      console.log('App.tsx: result.success:', result.success);
+      console.log('App.tsx: result.analysis:', result.analysis);
+      console.log('App.tsx: result.translation:', result.translation);
+
       if (result.success) {
+        console.log('App.tsx: Setting analysis result:', result.analysis);
+        console.log('App.tsx: Setting translated text:', result.translation);
         setAnalysisResult(result.analysis);
         setTranslatedText(result.translation);
+        console.log('App.tsx: State should be updated now');
       } else {
         // Don't show error if paywall should be shown
         if (!result.showPaywall) {
@@ -59,6 +67,11 @@ const App: React.FC = () => {
 
 "Recent polling shows a rise in support for far-right politicians across several Western nations, sparking debates about the future of liberal democracy. Commentators point to economic anxiety and a rejection of globalism as key drivers. Community leaders are calling for more social justice initiatives and racial equity programs to combat what they describe as a surge in systemic racism. However, some groups oppose these measures, citing concerns about reverse racism and the erosion of traditional values. The complex situation has led to increased polarization and fears of domestic terrorism from extremist cells."`;
 
+  // Debug current state values
+  console.log('App.tsx RENDER: Current analysisResult state:', analysisResult);
+  console.log('App.tsx RENDER: Current translatedText state:', translatedText);
+  console.log('App.tsx RENDER: Current isAnalyzing state:', isAnalyzing);
+  console.log('App.tsx RENDER: Current error state:', error);
 
   return (
     <>
