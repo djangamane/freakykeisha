@@ -117,7 +117,7 @@ const BiasDetectionApp = () => {
         )}
       </nav>
 
-      <BiasAuthGuard requireAuth={true}>
+      <BiasAuthGuard requireAuth={false}>
         <div className="hero-section" style={{ paddingTop: '120px' }}>
           <div className="hero-content">
             <h1>Fragile News Decoder AI</h1>

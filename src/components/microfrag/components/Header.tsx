@@ -29,6 +29,9 @@ const Header: React.FC = () => {
               <p className="text-xs text-green-300/70 mt-1 font-mono">
                 Analysis based on the frameworks of Dr. Frances Cress Welsing & Dr. Amos Wilson
               </p>
+              <p className="text-xs text-cyan-300/80 mt-1 font-mono">
+                No sign-in required — 3 free daily analyses
+              </p>
             </div>
 
             {/* Authentication Section */}

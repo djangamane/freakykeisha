@@ -33,6 +33,9 @@ const LandingPage = () => {
           <p>Advanced AI ethics platform specializing in racial bias detection and white fragility analysis for enterprise AI systems and general learning purposes for universities, students, and social equity initiatives.</p>
 
           <a href="#waitlist" className="cta-button">Join the Waitlist</a>
+          <Link to="/bias-detection" className="decoder-cta-button" style={{ marginLeft: '1rem' }}>
+            Try it now — no sign in required (3 free daily analyses)
+          </Link>
         </div>
       </section>
 

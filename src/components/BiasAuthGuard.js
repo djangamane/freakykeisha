@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useBiasAuth } from '../contexts/BiasAuthContext';
 import BiasAuthModal from './BiasAuthModal';
 
@@ -6,15 +6,17 @@ import BiasAuthModal from './BiasAuthModal';
  * Authentication guard component for bias detection features
  * Ensures user is authenticated before allowing access to protected content
  */
-const BiasAuthGuard = ({ children, requireAuth = true, fallback = null }) => {
+const BiasAuthGuard = ({ children, requireAuth = false, fallback = null }) => {
   const {
     isAuthenticated,
     sessionRestored,
     user,
-    checkDailyReset
+    checkDailyReset,
+    enterGuestMode
   } = useBiasAuth();
   
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const guestInitRef = useRef(false);
 
   // Check daily reset when component mounts or user changes
   useEffect(() => {
@@ -22,6 +24,19 @@ const BiasAuthGuard = ({ children, requireAuth = true, fallback = null }) => {
       checkDailyReset();
     }
   }, [user, checkDailyReset]);
+
+  // Auto-enter guest mode for non-protected routes once session is restored
+  useEffect(() => {
+    if (!requireAuth && sessionRestored && !isAuthenticated && !user && !guestInitRef.current) {
+      guestInitRef.current = true;
+      try {
+        enterGuestMode();
+      } catch (e) {
+        // Fail silently; UI can still render and prompt later if needed
+        console.warn('Auto guest initialization failed:', e?.message || e);
+      }
+    }
+  }, [requireAuth, sessionRestored, isAuthenticated, user, enterGuestMode]);
 
   // Show loading while session is being restored
   if (!sessionRestored) {
@@ -39,8 +54,23 @@ const BiasAuthGuard = ({ children, requireAuth = true, fallback = null }) => {
     );
   }
 
-  // If authentication is not required, render children directly
+  // If authentication is not required, render children directly.
+  // Make sure session restoration finished to avoid flicker.
   if (!requireAuth) {
+    if (!sessionRestored) {
+      return (
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '200px',
+          color: 'var(--text-color)',
+          fontFamily: 'Orbitron, sans-serif'
+        }}>
+          Loading...
+        </div>
+      );
+    }
     return <>{children}</>;
   }
 

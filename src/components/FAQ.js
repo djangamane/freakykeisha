@@ -64,6 +64,18 @@ const FAQ = () => {
 
   return (
     <div className="faq-container">
+      <div className="faq-try-banner" style={{
+        background: 'rgba(0, 255, 255, 0.08)',
+        border: '1px solid rgba(0, 255, 255, 0.3)',
+        padding: '12px 16px',
+        borderRadius: '10px',
+        marginBottom: '16px',
+        textAlign: 'center'
+      }}>
+        <a href="/bias-detection" style={{ color: 'var(--accent-color)', textDecoration: 'underline' }}>
+          Try it now — no sign in required (3 free daily analyses)
+        </a>
+      </div>
       <div className="faq-header">
         <h1>Frequently Asked Questions</h1>
         <p>Everything you need to know about Keisha AI's enterprise-ready bias detection and counter-racist AI ethics platform.</p>

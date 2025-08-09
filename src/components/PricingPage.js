@@ -47,7 +47,19 @@ const PricingPage = () => {
     navigate('/bias-detection');
   };
   return (
-    <div className="landing-container">
+    <div className="pricing-container">
+      <div className="pricing-banner" style={{
+        background: 'rgba(0, 255, 255, 0.08)',
+        border: '1px solid rgba(0, 255, 255, 0.3)',
+        padding: '12px 16px',
+        borderRadius: '10px',
+        marginBottom: '16px',
+        textAlign: 'center'
+      }}>
+        <a href="/bias-detection" style={{ color: 'var(--accent-color)', textDecoration: 'underline' }}>
+          Try the Fragile News Decoder now — no sign in required (3 free daily analyses)
+        </a>
+      </div>
       {/* Navigation Header */}
       <nav className="navigation-header">
         <div className="nav-links">

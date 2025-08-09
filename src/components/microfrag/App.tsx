@@ -75,7 +75,7 @@ const App: React.FC = () => {
 
   return (
     <>
-      <BiasAuthGuard>
+      <BiasAuthGuard requireAuth={false}>
         <div className="min-h-screen bg-black relative overflow-hidden">
           {/* Matrix Video Background */}
           <video
