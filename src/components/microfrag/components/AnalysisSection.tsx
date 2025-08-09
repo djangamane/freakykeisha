@@ -10,6 +10,27 @@ interface AnalysisSectionProps {
 }
 
 const AnalysisSection: React.FC<AnalysisSectionProps> = ({ analysisResult, isLoading }) => {
+  // Compute derived values before any early returns to satisfy Hooks rules
+  const detectedTermsRaw = analysisResult?.detected_terms || [];
+  const groupedTerms = React.useMemo(() => {
+    const map = new Map<string, { term: string; explanation?: string; count: number }>();
+    detectedTermsRaw.forEach((it) => {
+      const key = (it?.term || '').trim().toLowerCase();
+      if (!key) return;
+      if (!map.has(key)) {
+        map.set(key, { term: it.term, explanation: it.explanation, count: 1 });
+      } else {
+        const existing = map.get(key)!;
+        existing.count += 1;
+        if (!existing.explanation && it.explanation) {
+          existing.explanation = it.explanation;
+        }
+        map.set(key, existing);
+      }
+    });
+    return Array.from(map.values());
+  }, [detectedTermsRaw]);
+
   if (isLoading) {
     return <Loader />;
   }
@@ -28,28 +49,8 @@ const AnalysisSection: React.FC<AnalysisSectionProps> = ({ analysisResult, isLoa
     );
   }
 
-  const { score, detected_terms, analysis_summary } = analysisResult;
-
-  // Group duplicate terms (case-insensitive) and count occurrences for display
-  const groupedTerms = React.useMemo(() => {
-    const map = new Map<string, { term: string; explanation?: string; count: number }>();
-    (detected_terms || []).forEach((it) => {
-      const key = (it?.term || '').trim().toLowerCase();
-      if (!key) return;
-      if (!map.has(key)) {
-        map.set(key, { term: it.term, explanation: it.explanation, count: 1 });
-      } else {
-        const existing = map.get(key)!;
-        existing.count += 1;
-        // Prefer to keep the first non-empty explanation
-        if (!existing.explanation && it.explanation) {
-          existing.explanation = it.explanation;
-        }
-        map.set(key, existing);
-      }
-    });
-    return Array.from(map.values());
-  }, [detected_terms]);
+  const score = analysisResult?.score ?? 0;
+  const analysis_summary = analysisResult?.analysis_summary ?? '';
 
   return (
     <div className="p-6 space-y-6">
