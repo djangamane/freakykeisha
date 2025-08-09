@@ -30,6 +30,27 @@ const AnalysisSection: React.FC<AnalysisSectionProps> = ({ analysisResult, isLoa
 
   const { score, detected_terms, analysis_summary } = analysisResult;
 
+  // Group duplicate terms (case-insensitive) and count occurrences for display
+  const groupedTerms = React.useMemo(() => {
+    const map = new Map<string, { term: string; explanation?: string; count: number }>();
+    (detected_terms || []).forEach((it) => {
+      const key = (it?.term || '').trim().toLowerCase();
+      if (!key) return;
+      if (!map.has(key)) {
+        map.set(key, { term: it.term, explanation: it.explanation, count: 1 });
+      } else {
+        const existing = map.get(key)!;
+        existing.count += 1;
+        // Prefer to keep the first non-empty explanation
+        if (!existing.explanation && it.explanation) {
+          existing.explanation = it.explanation;
+        }
+        map.set(key, existing);
+      }
+    });
+    return Array.from(map.values());
+  }, [detected_terms]);
+
   return (
     <div className="p-6 space-y-6">
       <div className="bg-black/70 rounded-xl p-6 flex flex-col md:flex-row items-center gap-6 border border-cyan-500/30 shadow-lg shadow-cyan-500/20">
@@ -42,12 +63,21 @@ const AnalysisSection: React.FC<AnalysisSectionProps> = ({ analysisResult, isLoa
 
       <div>
         <h4 className="text-lg font-semibold text-green-400 mb-3 font-mono">Detected Euphemisms</h4>
-        {detected_terms.length > 0 ? (
+        {groupedTerms.length > 0 ? (
           <div className="space-y-3">
-            {detected_terms.map((item, index) => (
+            {groupedTerms.map((item, index) => (
               <div key={index} className="bg-black/70 p-4 rounded-lg border border-green-500/30 shadow-sm shadow-green-500/10">
-                <p className="font-bold text-green-300 text-md font-mono">"{item.term}"</p>
-                <p className="text-green-300/70 text-sm mt-1 font-mono">{item.explanation}</p>
+                <div className="flex items-center gap-2">
+                  <p className="font-bold text-green-300 text-md font-mono">"{item.term}"</p>
+                  {item.count > 1 && (
+                    <span className="inline-flex items-center rounded-md bg-green-500/20 px-2 py-0.5 text-xs font-mono text-green-300 border border-green-400/30">
+                      ×{item.count}
+                    </span>
+                  )}
+                </div>
+                {item.explanation && (
+                  <p className="text-green-300/70 text-sm mt-1 font-mono">{item.explanation}</p>
+                )}
               </div>
             ))}
           </div>
