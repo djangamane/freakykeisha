@@ -226,38 +226,33 @@ export const analyzeAndTranslateArticle = async (text, authToken = null) => {
         'authoritarian', 'fascist', 'populist', 'nationalist'
       ];
 
-      // Filter and enhance detected terms to focus on actual euphemisms
-      detectedTerms = detectedTerms.filter(term => {
-        const termLower = term.term.toLowerCase();
-        return whiteSupremacistEuphemisms.some(euphemism =>
-          termLower.includes(euphemism.toLowerCase())
-        );
-      }).map(term => {
+      // Preserve all detected terms from backend/AI, only enrich explanations when applicable
+      detectedTerms = detectedTerms.map(term => {
         const termLower = term.term.toLowerCase();
 
-        // Provide specific explanations for key euphemisms
+        // Provide specific explanations for key euphemisms (if they match our curated list patterns)
         if (termLower.includes('christian nationalism') || termLower.includes('christian nationalist')) {
           return {
             ...term,
-            explanation: "Christian nationalism is a euphemism for white supremacy wrapped in religious language, allowing white supremacists to advance their agenda while claiming divine mandate."
+            explanation: term.explanation || "Christian nationalism is a euphemism for white supremacy wrapped in religious language, allowing white supremacists to advance their agenda while claiming divine mandate."
           };
         }
         if (termLower.includes('racism') && !termLower.includes('white supremacy')) {
           return {
             ...term,
-            explanation: "The term 'racism' without specifying 'white supremacy' obscures the systemic nature of racial oppression and allows for false equivalencies like 'reverse racism.'"
+            explanation: term.explanation || "The term 'racism' without specifying 'white supremacy' obscures the systemic nature of racial oppression and allows for false equivalencies like 'reverse racism.'"
           };
         }
         if (termLower.includes('systemic racism')) {
           return {
             ...term,
-            explanation: "Systemic racism is often used as a sanitized term for white supremacy, making it sound like an abstract system rather than deliberate white supremacist policy."
+            explanation: term.explanation || "Systemic racism is often used as a sanitized term for white supremacy, making it sound like an abstract system rather than deliberate white supremacist policy."
           };
         }
         if (termLower.includes('domestic terrorism') || termLower.includes('domestic terrorist')) {
           return {
             ...term,
-            explanation: "Domestic terrorism is frequently used to avoid calling white supremacist violence what it is - organized white supremacist terrorism."
+            explanation: term.explanation || "Domestic terrorism is frequently used to avoid calling white supremacist violence what it is - organized white supremacist terrorism."
           };
         }
 
@@ -265,33 +260,34 @@ export const analyzeAndTranslateArticle = async (text, authToken = null) => {
         if (termLower.includes('extremism') || termLower.includes('extremist')) {
           return {
             ...term,
-            explanation: "Extremism is liberal code for white supremacy. By calling it 'extremism,' they avoid naming the specific system of white supremacy and make it sound like fringe behavior rather than mainstream white politics."
+            explanation: term.explanation || "Extremism is liberal code for white supremacy. By calling it 'extremism,' they avoid naming the specific system of white supremacy and make it sound like fringe behavior rather than mainstream white politics."
           };
         }
         if (termLower.includes('divisive rhetoric') || termLower.includes('inflammatory language')) {
           return {
             ...term,
-            explanation: "This language treats white supremacist messaging as mere 'rhetoric' rather than the systematic dehumanization it actually is. It's liberal complicity in protecting white supremacy from proper analysis."
+            explanation: term.explanation || "This language treats white supremacist messaging as mere 'rhetoric' rather than the systematic dehumanization it actually is. It's liberal complicity in protecting white supremacy from proper analysis."
           };
         }
         if (termLower.includes('hate speech') || termLower.includes('bigotry')) {
           return {
             ...term,
-            explanation: "These terms individualize white supremacy as personal 'hate' rather than recognizing it as the systematic oppression it is. This protects the white supremacist system by making it about individual bad actors."
+            explanation: term.explanation || "These terms individualize white supremacy as personal 'hate' rather than recognizing it as the systematic oppression it is. This protects the white supremacist system by making it about individual bad actors."
           };
         }
         if (termLower.includes('authoritarian') || termLower.includes('fascist')) {
           return {
             ...term,
-            explanation: "These terms allow liberals to critique white supremacist tactics without naming white supremacy itself. It's historical deflection - comparing to European fascism while ignoring American white supremacy."
+            explanation: term.explanation || "These terms allow liberals to critique white supremacist tactics without naming white supremacy itself. It's historical deflection - comparing to European fascism while ignoring American white supremacy."
           };
         }
 
+        // If it doesn't match curated patterns, keep as-is (no filtering out)
         return term;
       });
 
       // Backend AI now properly implements counter-racism framework
-      // Frontend correction system removed - no longer needed
+      // Frontend no longer filters out terms, only enriches when helpful
 
       console.log('Enhanced euphemism detection debug:', {
         originalKeyIndicators: data.analysis.key_indicators,
