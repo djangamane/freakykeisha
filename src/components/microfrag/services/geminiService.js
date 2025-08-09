@@ -190,20 +190,28 @@ export const analyzeAndTranslateArticle = async (text, authToken = null) => {
     });
 
     if (data.success && data.analysis) {
-      // Transform key_indicators from backend format to frontend format
+      // Transform backend indicators (supports both detected_terms and key_indicators)
       let detectedTerms = [];
-      if (data.analysis.key_indicators && Array.isArray(data.analysis.key_indicators)) {
-        detectedTerms = data.analysis.key_indicators.map((indicator, index) => {
+      const indicators = Array.isArray(data.analysis?.detected_terms)
+        ? data.analysis.detected_terms
+        : (Array.isArray(data.analysis?.key_indicators) ? data.analysis.key_indicators : []);
+
+      if (indicators.length > 0) {
+        detectedTerms = indicators.map((indicator, index) => {
           // If indicator is already an object with term/explanation, use it
-          if (typeof indicator === 'object' && indicator.term) {
-            return indicator;
+          if (indicator && typeof indicator === 'object') {
+            // Some backends may return { term, explanation } or generic strings
+            const term = indicator.term || (typeof indicator.text === 'string' ? indicator.text : `Indicator ${index + 1}`);
+            const explanation = indicator.explanation || indicator.reason || (typeof indicator === 'string' ? undefined : undefined);
+            return {
+              term,
+              explanation: explanation || "This term functions as a euphemism that obscures the underlying mechanisms of white supremacy."
+            };
           }
           // If indicator is a string, convert it to the expected format
           return {
             term: typeof indicator === 'string' ? indicator : `Indicator ${index + 1}`,
-            explanation: typeof indicator === 'string'
-              ? "This term functions as a euphemism that obscures the underlying mechanisms of white supremacy."
-              : indicator.explanation || "White supremacist euphemism detected."
+            explanation: "This term functions as a euphemism that obscures the underlying mechanisms of white supremacy."
           };
         });
       }
